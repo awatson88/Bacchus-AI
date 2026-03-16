@@ -24,7 +24,7 @@ export function buildApp(context: BacchusAppContext) {
 
   app.register(healthRoutes(context), { prefix: "/health" });
   app.register(inventoryRoutes(context), { prefix: "/api/v1/inventory" });
-  app.register(intakeRoutes, { prefix: "/api/v1/intake" });
+  app.register(intakeRoutes(context), { prefix: "/api/v1/intake" });
   app.register(importRoutes(context), { prefix: "/api/v1/imports" });
   app.register(recommendationRoutes(context), {
     prefix: "/api/v1/recommendations"

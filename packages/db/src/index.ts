@@ -65,6 +65,36 @@ CREATE TABLE IF NOT EXISTS import_runs (
   warnings_json TEXT NOT NULL DEFAULT '[]',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS intake_jobs (
+  id TEXT PRIMARY KEY,
+  status TEXT NOT NULL,
+  message TEXT NOT NULL,
+  quantity INTEGER NOT NULL,
+  location TEXT,
+  candidate_json TEXT,
+  approved_item_ids_json TEXT NOT NULL DEFAULT '[]',
+  error TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_intake_jobs_status_created
+  ON intake_jobs (status, created_at);
+
+CREATE TABLE IF NOT EXISTS intake_images (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  intake_job_id TEXT NOT NULL,
+  filename TEXT NOT NULL,
+  content_type TEXT NOT NULL,
+  url TEXT,
+  storage_key TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (intake_job_id) REFERENCES intake_jobs(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_intake_images_job
+  ON intake_images (intake_job_id);
 `;
 
 export function resolveDatabasePath(

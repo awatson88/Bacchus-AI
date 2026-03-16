@@ -19,6 +19,25 @@ export const inventoryStatusSchema = z.enum([
   "missing"
 ]);
 
+export const inventoryEventTypeSchema = z.enum([
+  "acquired",
+  "opened",
+  "poured",
+  "consumed",
+  "moved",
+  "corrected",
+  "deleted"
+]);
+
+export const intakeJobStatusSchema = z.enum([
+  "queued",
+  "processing",
+  "needs_review",
+  "approved",
+  "completed",
+  "failed"
+]);
+
 export const inventoryRecordSchema = z.object({
   id: z.string(),
   category: inventoryCategorySchema,
@@ -70,11 +89,110 @@ export const createIntakeRequestSchema = z.object({
   images: z.array(intakeImageSchema).min(1)
 });
 
+export const createInventoryItemRequestSchema = z.object({
+  category: inventoryCategorySchema,
+  producer: z.string().min(1),
+  label: z.string().min(1),
+  quantity: z.number().int().positive().max(24).default(1),
+  vintage: z.number().int().min(1800).max(2100).optional(),
+  country: z.string().optional(),
+  region: z.string().optional(),
+  style: z.string().optional(),
+  grapeVarieties: z.array(z.string()).default([]),
+  baseSpirit: z.string().optional(),
+  sizeMl: z.number().int().positive().optional(),
+  abv: z.number().min(0).max(100).optional(),
+  location: z.string().min(1),
+  bin: z.string().optional(),
+  status: inventoryStatusSchema.default("sealed"),
+  fillPercent: z.number().int().min(0).max(100).optional(),
+  drinkFrom: z.string().datetime().optional(),
+  drinkTo: z.string().datetime().optional(),
+  qualityScore: z.number().min(0).max(100).optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  pairingTags: z.array(z.string()).default([]),
+  cocktailTags: z.array(z.string()).default([]),
+  notes: z.string().optional()
+});
+
+export const updateInventoryItemRequestSchema = z.object({
+  status: inventoryStatusSchema.optional(),
+  fillPercent: z.number().int().min(0).max(100).optional(),
+  location: z.string().optional(),
+  bin: z.string().optional(),
+  notes: z.string().optional(),
+  eventType: inventoryEventTypeSchema.optional(),
+  quantityDelta: z.number().optional()
+});
+
+export const createInventoryEventRequestSchema = z.object({
+  eventType: inventoryEventTypeSchema,
+  quantityDelta: z.number().optional(),
+  notes: z.string().optional(),
+  fillPercent: z.number().int().min(0).max(100).optional(),
+  status: inventoryStatusSchema.optional(),
+  location: z.string().optional(),
+  bin: z.string().optional()
+});
+
+export const inventoryEventSchema = z.object({
+  id: z.number().int().nonnegative(),
+  inventoryItemId: z.string(),
+  eventType: inventoryEventTypeSchema,
+  quantityDelta: z.number().optional(),
+  notes: z.string().optional(),
+  createdAt: z.string().datetime()
+});
+
+export const intakeCandidateSchema = z.object({
+  category: inventoryCategorySchema,
+  producer: z.string().optional(),
+  label: z.string().optional(),
+  vintage: z.number().int().min(1800).max(2100).optional(),
+  baseSpirit: z.string().optional(),
+  style: z.string().optional(),
+  grapeVarieties: z.array(z.string()).default([]),
+  location: z.string().optional(),
+  bin: z.string().optional(),
+  quantity: z.number().int().positive().default(1),
+  confidence: z.number().min(0).max(1),
+  notes: z.string().optional(),
+  reasoning: z.array(z.string()).default([])
+});
+
+export const intakeJobSchema = z.object({
+  id: z.string(),
+  status: intakeJobStatusSchema,
+  message: z.string(),
+  quantity: z.number().int().positive(),
+  location: z.string().optional(),
+  images: z.array(intakeImageSchema),
+  candidate: intakeCandidateSchema.optional(),
+  approvedItemIds: z.array(z.string()).default([]),
+  error: z.string().optional(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime()
+});
+
 export type InventoryCategory = z.infer<typeof inventoryCategorySchema>;
 export type InventoryStatus = z.infer<typeof inventoryStatusSchema>;
+export type InventoryEventType = z.infer<typeof inventoryEventTypeSchema>;
+export type IntakeJobStatus = z.infer<typeof intakeJobStatusSchema>;
 export type InventoryRecord = z.infer<typeof inventoryRecordSchema>;
 export type InventoryQuery = z.infer<typeof inventoryQuerySchema>;
 export type CreateIntakeRequest = z.infer<typeof createIntakeRequestSchema>;
+export type CreateInventoryItemRequest = z.infer<
+  typeof createInventoryItemRequestSchema
+>;
+export type UpdateInventoryItemRequest = z.infer<
+  typeof updateInventoryItemRequestSchema
+>;
+export type CreateInventoryEventRequest = z.infer<
+  typeof createInventoryEventRequestSchema
+>;
+export type InventoryEvent = z.infer<typeof inventoryEventSchema>;
+export type IntakeCandidate = z.infer<typeof intakeCandidateSchema>;
+export type IntakeJob = z.infer<typeof intakeJobSchema>;
 
 export function getInventoryDisplayName(record: InventoryRecord): string {
   return [record.vintage, record.producer, record.label].filter(Boolean).join(" ");
