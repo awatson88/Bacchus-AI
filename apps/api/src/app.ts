@@ -1,12 +1,14 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import sensible from "@fastify/sensible";
+import type { BacchusAppContext } from "./lib/appContext.js";
 import { healthRoutes } from "./routes/health.js";
+import { importRoutes } from "./routes/imports.js";
 import { intakeRoutes } from "./routes/intake.js";
 import { inventoryRoutes } from "./routes/inventory.js";
 import { recommendationRoutes } from "./routes/recommendations.js";
 
-export function buildApp() {
+export function buildApp(context: BacchusAppContext) {
   const app = Fastify({
     logger: true
   });
@@ -16,10 +18,17 @@ export function buildApp() {
   });
   app.register(sensible);
 
-  app.register(healthRoutes, { prefix: "/health" });
-  app.register(inventoryRoutes, { prefix: "/api/v1/inventory" });
+  app.addHook("onClose", async () => {
+    await context.inventoryStore.dispose();
+  });
+
+  app.register(healthRoutes(context), { prefix: "/health" });
+  app.register(inventoryRoutes(context), { prefix: "/api/v1/inventory" });
   app.register(intakeRoutes, { prefix: "/api/v1/intake" });
-  app.register(recommendationRoutes, { prefix: "/api/v1/recommendations" });
+  app.register(importRoutes(context), { prefix: "/api/v1/imports" });
+  app.register(recommendationRoutes(context), {
+    prefix: "/api/v1/recommendations"
+  });
 
   return app;
 }

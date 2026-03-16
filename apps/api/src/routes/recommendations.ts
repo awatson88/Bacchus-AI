@@ -5,30 +5,34 @@ import {
   recommendWines,
   winePairingRequestSchema
 } from "@bacchus/domain";
-import { demoInventory } from "../data/demoInventory.js";
+import type { BacchusAppContext } from "../lib/appContext.js";
 
-export async function recommendationRoutes(app: FastifyInstance) {
-  app.post("/wine", async (request) => {
-    const payload = winePairingRequestSchema.parse(request.body);
-    const recommendations = recommendWines(payload, demoInventory);
+export function recommendationRoutes(context: BacchusAppContext) {
+  return async function recommendationPlugin(app: FastifyInstance) {
+    app.post("/wine", async (request) => {
+      const payload = winePairingRequestSchema.parse(request.body);
+      const inventory = await context.inventoryStore.list();
+      const recommendations = recommendWines(payload, inventory);
 
-    return {
-      meal: payload.meal,
-      mood: payload.mood ?? null,
-      weatherSummary: payload.weatherSummary ?? null,
-      recommendations
-    };
-  });
+      return {
+        meal: payload.meal,
+        mood: payload.mood ?? null,
+        weatherSummary: payload.weatherSummary ?? null,
+        recommendations
+      };
+    });
 
-  app.post("/cocktails", async (request) => {
-    const payload = cocktailSuggestionRequestSchema.parse(request.body);
-    const recommendations = recommendCocktails(payload, demoInventory);
+    app.post("/cocktails", async (request) => {
+      const payload = cocktailSuggestionRequestSchema.parse(request.body);
+      const inventory = await context.inventoryStore.list();
+      const recommendations = recommendCocktails(payload, inventory);
 
-    return {
-      mood: payload.mood ?? null,
-      weatherSummary: payload.weatherSummary ?? null,
-      preferredBaseSpirit: payload.preferredBaseSpirit ?? null,
-      recommendations
-    };
-  });
+      return {
+        mood: payload.mood ?? null,
+        weatherSummary: payload.weatherSummary ?? null,
+        preferredBaseSpirit: payload.preferredBaseSpirit ?? null,
+        recommendations
+      };
+    });
+  };
 }

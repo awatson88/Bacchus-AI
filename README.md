@@ -31,7 +31,8 @@ This first scaffold includes:
 
 - a shared wine and liquor inventory model
 - starter recommendation heuristics for meal-to-wine and mood-to-cocktail prompts
-- a Fastify API with inventory, intake, and recommendation endpoints
-- a normalized Postgres schema ready for Prisma migrations
+- a Fastify API with inventory, intake, recommendation, and CellarTracker import endpoints
+- a repository layer that uses Prisma when `DATABASE_URL` is available and falls back to in-memory demo data when it is not
+- a normalized Postgres schema ready for Prisma migrations, including cellar bin support
 
-The next implementation step is connecting the API to a real database and replacing the demo inventory with persisted data.
+The next implementation step is wiring migrations and a live Postgres instance into the API so imports and updates persist across restarts.

@@ -33,6 +33,7 @@ export const inventoryRecordSchema = z.object({
   sizeMl: z.number().int().positive().optional(),
   abv: z.number().min(0).max(100).optional(),
   location: z.string(),
+  bin: z.string().optional(),
   status: inventoryStatusSchema,
   fillPercent: z.number().int().min(0).max(100).optional(),
   drinkFrom: z.string().datetime().optional(),
@@ -47,6 +48,7 @@ export const inventoryRecordSchema = z.object({
 export const inventoryQuerySchema = z.object({
   category: inventoryCategorySchema.optional(),
   location: z.string().optional(),
+  bin: z.string().optional(),
   status: inventoryStatusSchema.optional()
 });
 

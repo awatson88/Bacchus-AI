@@ -110,6 +110,7 @@ model InventoryItem {
   id                String                @id @default(cuid())
   variantId         String
   locationId        String?
+  bin               String?
   status            InventoryStatus       @default(SEALED)
   fillPercent       Int?
   acquiredAt        DateTime?
@@ -131,6 +132,7 @@ model InventoryItem {
 
   @@index([variantId, status])
   @@index([locationId, status])
+  @@index([locationId, bin])
 }
 
 model InventoryEvent {
