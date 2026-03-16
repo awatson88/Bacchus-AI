@@ -6,3 +6,6 @@ coverage
 *.log
 .turbo
 .tsbuildinfo
+*.db
+*.db-shm
+*.db-wal

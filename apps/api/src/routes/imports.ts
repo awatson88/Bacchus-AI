@@ -45,6 +45,12 @@ export function importRoutes(context: BacchusAppContext) {
         parsed.records,
         "cellartracker_import"
       );
+      await context.inventoryStore.recordImportRun(
+        "cellartracker",
+        parsed.totalRows,
+        parsed.expandedBottleCount,
+        parsed.warnings
+      );
 
       return {
         totalRows: parsed.totalRows,

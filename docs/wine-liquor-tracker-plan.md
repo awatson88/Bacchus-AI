@@ -41,7 +41,7 @@ flowchart LR
     A["Phone intake<br/>iMessage extension, share sheet, or web upload"] --> B["Ingestion API"]
     C["ChatGPT connector<br/>Apps SDK + MCP tools"] --> D["Core service"]
     B --> D
-    D --> E["Postgres"]
+    D --> E["SQLite (local-first)<br/>upgradeable later if needed"]
     D --> F["Object storage"]
     D --> G["Job queue / workers"]
     G --> H["OpenAI Responses API<br/>vision + structured extraction"]
@@ -362,7 +362,7 @@ That keeps the hard part isolated and still gets you a useful system quickly.
 
 Infrastructure:
 
-- Postgres for primary data
+- SQLite for local-first primary data during the household/private phase
 - S3-compatible object storage for images and import artifacts
 - background jobs for extraction and enrichment
 - one secrets store for API keys and provider credentials

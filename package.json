@@ -12,8 +12,7 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "tsc -b --clean",
-    "db:generate": "npm run db:generate --workspace @bacchus/db",
-    "db:validate": "npm run db:validate --workspace @bacchus/db",
+    "db:init": "npm run db:init --workspace @bacchus/db",
     "dev:api": "tsx watch apps/api/src/index.ts",
     "dev:chatgpt": "tsx watch apps/chatgpt/src/index.ts",
     "start:api": "node apps/api/dist/index.js",

@@ -14,14 +14,14 @@ The near-term goal is simple:
 - `apps/api`: starter HTTP API for intake, inventory, and recommendation routes
 - `apps/chatgpt`: typed tool catalog for the future ChatGPT MCP connector
 - `packages/domain`: shared schemas and recommendation helpers
-- `packages/db`: Prisma schema for the inventory database
+- `packages/db`: SQLite schema bootstrap and database helpers
 - `docs/wine-liquor-tracker-plan.md`: product and architecture plan
 
 ## Getting started
 
 1. Copy `.env.example` to `.env`.
 2. Install dependencies with `npm install`.
-3. Validate the Prisma schema with `npm run db:validate`.
+3. Initialize the SQLite database with `npm run db:init`.
 4. Build the workspace with `npm run build`.
 5. Start the API with `npm run dev:api`.
 
@@ -32,7 +32,7 @@ This first scaffold includes:
 - a shared wine and liquor inventory model
 - starter recommendation heuristics for meal-to-wine and mood-to-cocktail prompts
 - a Fastify API with inventory, intake, recommendation, and CellarTracker import endpoints
-- a repository layer that uses Prisma when `DATABASE_URL` is available and falls back to in-memory demo data when it is not
-- a normalized Postgres schema ready for Prisma migrations, including cellar bin support
+- a repository layer backed by a local SQLite database, matching the lightweight approach used in Epicurus AI
+- automatic first-run schema initialization and demo inventory seeding, including cellar bin support
 
-The next implementation step is wiring migrations and a live Postgres instance into the API so imports and updates persist across restarts.
+The next implementation step is expanding the SQLite-backed model beyond imports and reads so bottle updates, events, and image-intake jobs also persist end to end.
