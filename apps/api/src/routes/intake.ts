@@ -2,7 +2,9 @@ import type { FastifyInstance } from "fastify";
 import {
   createInventoryItemRequestSchema,
   createIntakeRequestSchema,
-  type CreateInventoryItemRequest
+  intakeJobQuerySchema,
+  type CreateInventoryItemRequest,
+  updateIntakeCandidateSchema
 } from "@bacchus/domain";
 import type { BacchusAppContext } from "../lib/appContext.js";
 
@@ -29,8 +31,9 @@ export function intakeRoutes(context: BacchusAppContext) {
       });
     });
 
-    app.get("/jobs", async () => {
-      const jobs = await context.inventoryStore.listIntakeJobs();
+    app.get("/jobs", async (request) => {
+      const query = intakeJobQuerySchema.parse(request.query);
+      const jobs = await context.inventoryStore.listIntakeJobs(query);
       return {
         count: jobs.length,
         jobs
@@ -40,6 +43,34 @@ export function intakeRoutes(context: BacchusAppContext) {
     app.get("/jobs/:id", async (request, reply) => {
       const params = request.params as { id: string };
       const job = await context.inventoryStore.getIntakeJob(params.id);
+      if (!job) {
+        return reply.notFound("Intake job not found.");
+      }
+
+      return { job };
+    });
+
+    app.patch("/jobs/:id/candidate", async (request, reply) => {
+      const params = request.params as { id: string };
+      const patch = omitUndefined(
+        updateIntakeCandidateSchema.parse(request.body ?? {})
+      );
+      const job = await context.inventoryStore.updateIntakeJobCandidate(
+        params.id,
+        patch
+      );
+
+      if (!job) {
+        return reply.notFound("Intake job not found.");
+      }
+
+      return { job };
+    });
+
+    app.post("/jobs/:id/reprocess", async (request, reply) => {
+      const params = request.params as { id: string };
+      const job = await context.inventoryStore.reprocessIntakeJob(params.id);
+
       if (!job) {
         return reply.notFound("Intake job not found.");
       }

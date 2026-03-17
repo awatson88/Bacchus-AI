@@ -174,6 +174,12 @@ export const intakeJobSchema = z.object({
   updatedAt: z.string().datetime()
 });
 
+export const updateIntakeCandidateSchema = intakeCandidateSchema.partial();
+
+export const intakeJobQuerySchema = z.object({
+  status: intakeJobStatusSchema.optional()
+});
+
 export type InventoryCategory = z.infer<typeof inventoryCategorySchema>;
 export type InventoryStatus = z.infer<typeof inventoryStatusSchema>;
 export type InventoryEventType = z.infer<typeof inventoryEventTypeSchema>;
@@ -193,6 +199,8 @@ export type CreateInventoryEventRequest = z.infer<
 export type InventoryEvent = z.infer<typeof inventoryEventSchema>;
 export type IntakeCandidate = z.infer<typeof intakeCandidateSchema>;
 export type IntakeJob = z.infer<typeof intakeJobSchema>;
+export type UpdateIntakeCandidate = z.infer<typeof updateIntakeCandidateSchema>;
+export type IntakeJobQuery = z.infer<typeof intakeJobQuerySchema>;
 
 export function getInventoryDisplayName(record: InventoryRecord): string {
   return [record.vintage, record.producer, record.label].filter(Boolean).join(" ");

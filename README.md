@@ -35,6 +35,6 @@ This first scaffold includes:
 - a repository layer backed by a local SQLite database, matching the lightweight approach used in Epicurus AI
 - automatic first-run schema initialization and demo inventory seeding, including cellar bin support
 - inventory write/update/event endpoints for bottle lifecycle tracking
-- persisted photo-intake jobs with review-and-approve flow, ready for a future vision step
+- persisted photo-intake jobs with reprocess, review, edit, and approve flow, ready for a future vision step
 
 The next implementation step is enriching the intake pipeline with real image extraction and then mapping CellarTracker exports more completely into the SQLite model.

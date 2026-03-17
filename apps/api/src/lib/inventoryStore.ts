@@ -9,12 +9,14 @@ import type {
   CreateInventoryEventRequest,
   CreateInventoryItemRequest,
   IntakeCandidate,
+  IntakeJobQuery,
   IntakeJob,
   IntakeJobStatus,
   InventoryEvent,
   InventoryEventType,
   InventoryQuery,
   InventoryRecord,
+  UpdateIntakeCandidate,
   UpdateInventoryItemRequest
 } from "@bacchus/domain";
 import { createInventoryItemRequestSchema } from "@bacchus/domain";
@@ -54,8 +56,13 @@ export type InventoryStore = {
     warnings: string[]
   ): Promise<void>;
   createIntakeJob(request: CreateIntakeRequest): Promise<IntakeJob>;
-  listIntakeJobs(): Promise<IntakeJob[]>;
+  listIntakeJobs(query?: IntakeJobQuery): Promise<IntakeJob[]>;
   getIntakeJob(id: string): Promise<IntakeJob | null>;
+  updateIntakeJobCandidate(
+    id: string,
+    patch: UpdateIntakeCandidate
+  ): Promise<IntakeJob | null>;
+  reprocessIntakeJob(id: string): Promise<IntakeJob | null>;
   approveIntakeJob(
     id: string,
     overrides?: Partial<CreateInventoryItemRequest>
@@ -234,6 +241,44 @@ function inferCandidateFromIntake(request: CreateIntakeRequest): IntakeCandidate
   const quantity = request.quantity;
   const reasons: string[] = [];
 
+  const brandMatchers = [
+    {
+      keyword: "cynar",
+      category: "liqueur",
+      producer: "Cynar",
+      label: "Amaro",
+      baseSpirit: undefined
+    },
+    {
+      keyword: "campari",
+      category: "aperitif",
+      producer: "Campari",
+      label: "Bitter Aperitivo",
+      baseSpirit: undefined
+    },
+    {
+      keyword: "aperol",
+      category: "aperitif",
+      producer: "Aperol",
+      label: "Aperitivo",
+      baseSpirit: undefined
+    },
+    {
+      keyword: "chartreuse",
+      category: "liqueur",
+      producer: "Chartreuse",
+      label: "Liqueur",
+      baseSpirit: undefined
+    },
+    {
+      keyword: "fernet",
+      category: "liqueur",
+      producer: "Fernet",
+      label: "Amaro",
+      baseSpirit: undefined
+    }
+  ] as const;
+
   const spiritMatchers = [
     { keyword: "bourbon", category: "spirit", baseSpirit: "bourbon" },
     { keyword: "rye", category: "spirit", baseSpirit: "rye" },
@@ -258,12 +303,17 @@ function inferCandidateFromIntake(request: CreateIntakeRequest): IntakeCandidate
   ] as const;
 
   const wineHints = ["cabernet", "pinot", "chardonnay", "barolo", "riesling", "champagne", "wine"];
+  const matchedBrand = brandMatchers.find((entry) => lower.includes(entry.keyword));
   const matchedSpirit = spiritMatchers.find((entry) => lower.includes(entry.keyword));
   const vintageMatch = message.match(/\b(19|20)\d{2}\b/);
 
   let category: IntakeCandidate["category"] | undefined;
   let baseSpirit: string | undefined;
-  if (matchedSpirit) {
+  if (matchedBrand) {
+    category = matchedBrand.category;
+    baseSpirit = matchedBrand.baseSpirit;
+    reasons.push(`Detected "${matchedBrand.keyword}" in the message.`);
+  } else if (matchedSpirit) {
     category = matchedSpirit.category;
     baseSpirit = matchedSpirit.baseSpirit;
     reasons.push(`Detected "${matchedSpirit.keyword}" in the message.`);
@@ -291,9 +341,14 @@ function inferCandidateFromIntake(request: CreateIntakeRequest): IntakeCandidate
   let producer: string | undefined;
   let label: string | undefined;
 
-  if (parts.length >= 2) {
+  if (matchedBrand) {
+    producer = matchedBrand.producer;
+    label = matchedBrand.label;
+  }
+
+  if (!producer && parts.length >= 2) {
     [producer, label] = parts;
-  } else {
+  } else if (!producer) {
     const words = cleanedMessage.replace(/\b(19|20)\d{2}\b/g, "").trim().split(/\s+/);
     if (words.length >= 3) {
       producer = words.slice(0, 2).join(" ");
@@ -303,13 +358,13 @@ function inferCandidateFromIntake(request: CreateIntakeRequest): IntakeCandidate
     }
   }
 
-  if (matchedSpirit?.keyword === "amaro" && cleanedMessage) {
+  if (!matchedBrand && matchedSpirit?.keyword === "amaro" && cleanedMessage) {
     const words = cleanedMessage.split(/\s+/);
     producer = words[0];
     label = "Amaro";
   }
 
-  const confidence = matchedSpirit ? 0.82 : 0.68;
+  const confidence = matchedBrand ? 0.9 : matchedSpirit ? 0.82 : 0.68;
 
   return {
     category,
@@ -477,12 +532,53 @@ class InMemoryInventoryStore implements InventoryStore {
     return job;
   }
 
-  async listIntakeJobs(): Promise<IntakeJob[]> {
-    return this.jobs;
+  async listIntakeJobs(query?: IntakeJobQuery): Promise<IntakeJob[]> {
+    if (!query?.status) {
+      return this.jobs;
+    }
+
+    return this.jobs.filter((job) => job.status === query.status);
   }
 
   async getIntakeJob(id: string): Promise<IntakeJob | null> {
     return this.jobs.find((job) => job.id === id) ?? null;
+  }
+
+  async updateIntakeJobCandidate(
+    id: string,
+    patch: UpdateIntakeCandidate
+  ): Promise<IntakeJob | null> {
+    const job = this.jobs.find((entry) => entry.id === id);
+    if (!job) {
+      return null;
+    }
+
+    job.candidate = {
+      ...job.candidate,
+      ...patch,
+      reasoning: patch.reasoning ?? job.candidate?.reasoning ?? [],
+      grapeVarieties: patch.grapeVarieties ?? job.candidate?.grapeVarieties ?? []
+    } as IntakeCandidate;
+    job.status = "needs_review";
+    job.updatedAt = new Date().toISOString();
+    return job;
+  }
+
+  async reprocessIntakeJob(id: string): Promise<IntakeJob | null> {
+    const job = this.jobs.find((entry) => entry.id === id);
+    if (!job) {
+      return null;
+    }
+
+    job.candidate = inferCandidateFromIntake({
+      message: job.message,
+      quantity: job.quantity,
+      location: job.location,
+      images: job.images
+    });
+    job.status = job.candidate ? "needs_review" : "queued";
+    job.updatedAt = new Date().toISOString();
+    return job;
   }
 
   async approveIntakeJob(
@@ -637,6 +733,7 @@ class SqliteInventoryStore implements InventoryStore {
       SELECT id, status, message, quantity, location, candidate_json,
         approved_item_ids_json, error, created_at, updated_at
       FROM intake_jobs
+      WHERE (@status IS NULL OR status = @status)
       ORDER BY created_at DESC, id DESC
     `);
 
@@ -890,8 +987,10 @@ class SqliteInventoryStore implements InventoryStore {
     return job;
   }
 
-  async listIntakeJobs(): Promise<IntakeJob[]> {
-    const rows = this.listIntakeJobsStatement.all() as IntakeJobRow[];
+  async listIntakeJobs(query?: IntakeJobQuery): Promise<IntakeJob[]> {
+    const rows = this.listIntakeJobsStatement.all({
+      status: query?.status ?? null
+    }) as IntakeJobRow[];
     return rows.map((row) =>
       mapJobRowToIntakeJob(
         row,
@@ -910,6 +1009,57 @@ class SqliteInventoryStore implements InventoryStore {
     return mapJobRowToIntakeJob(row, images);
   }
 
+  async updateIntakeJobCandidate(
+    id: string,
+    patch: UpdateIntakeCandidate
+  ): Promise<IntakeJob | null> {
+    const job = await this.getIntakeJob(id);
+    if (!job) {
+      return null;
+    }
+
+    const nextCandidate = {
+      ...job.candidate,
+      ...patch,
+      reasoning: patch.reasoning ?? job.candidate?.reasoning ?? [],
+      grapeVarieties: patch.grapeVarieties ?? job.candidate?.grapeVarieties ?? []
+    } as IntakeCandidate;
+
+    this.updateIntakeJobStatement.run({
+      id,
+      status: "needs_review",
+      candidate_json: JSON.stringify(nextCandidate),
+      approved_item_ids_json: JSON.stringify(job.approvedItemIds),
+      error: job.error ?? null
+    });
+
+    return this.getIntakeJob(id);
+  }
+
+  async reprocessIntakeJob(id: string): Promise<IntakeJob | null> {
+    const job = await this.getIntakeJob(id);
+    if (!job) {
+      return null;
+    }
+
+    const nextCandidate = inferCandidateFromIntake({
+      message: job.message,
+      quantity: job.quantity,
+      location: job.location,
+      images: job.images
+    });
+
+    this.updateIntakeJobStatement.run({
+      id,
+      status: nextCandidate ? "needs_review" : "queued",
+      candidate_json: nextCandidate ? JSON.stringify(nextCandidate) : null,
+      approved_item_ids_json: JSON.stringify(job.approvedItemIds),
+      error: job.error ?? null
+    });
+
+    return this.getIntakeJob(id);
+  }
+
   async approveIntakeJob(
     id: string,
     overrides?: Partial<CreateInventoryItemRequest>
@@ -925,10 +1075,26 @@ class SqliteInventoryStore implements InventoryStore {
     }
 
     const created = await this.createItems(request, "image_intake");
+    const approvedCandidate: IntakeCandidate = {
+      category: request.category,
+      producer: request.producer,
+      label: request.label,
+      vintage: request.vintage,
+      baseSpirit: request.baseSpirit,
+      style: request.style,
+      grapeVarieties: request.grapeVarieties,
+      location: request.location,
+      bin: request.bin,
+      quantity: request.quantity,
+      confidence: request.confidence ?? job.candidate?.confidence ?? 1,
+      notes: request.notes,
+      reasoning: job.candidate?.reasoning ?? []
+    };
+
     this.updateIntakeJobStatement.run({
       id,
       status: "completed",
-      candidate_json: job.candidate ? JSON.stringify(job.candidate) : null,
+      candidate_json: JSON.stringify(approvedCandidate),
       approved_item_ids_json: JSON.stringify(created.map((item) => item.id)),
       error: null
     });
