@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS intake_jobs (
   quantity INTEGER NOT NULL,
   location TEXT,
   candidate_json TEXT,
+  candidates_json TEXT NOT NULL DEFAULT '[]',
   approved_item_ids_json TEXT NOT NULL DEFAULT '[]',
   error TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -120,4 +121,29 @@ export function initializeDatabase(
   }
 
   database.exec(schemaSql);
+  ensureColumn(
+    database,
+    "intake_jobs",
+    "candidates_json",
+    "TEXT NOT NULL DEFAULT '[]'"
+  );
+}
+
+function ensureColumn(
+  database: DatabaseSync,
+  tableName: string,
+  columnName: string,
+  columnDefinition: string
+): void {
+  const tableInfo = database
+    .prepare(`PRAGMA table_info(${tableName})`)
+    .all() as Array<{ name: string }>;
+
+  if (tableInfo.some((column) => column.name === columnName)) {
+    return;
+  }
+
+  database.exec(
+    `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnDefinition};`
+  );
 }

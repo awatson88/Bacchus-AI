@@ -25,6 +25,11 @@ The near-term goal is simple:
 4. Build the workspace with `npm run build`.
 5. Start the API with `npm run dev:api`.
 
+Optional image extraction configuration:
+
+- set `OPENAI_API_KEY` to enable OpenAI-powered bottle extraction from image URLs
+- override `OPENAI_VISION_MODEL` if you want to swap the default multimodal model
+
 ## Current status
 
 This first scaffold includes:
@@ -35,6 +40,8 @@ This first scaffold includes:
 - a repository layer backed by a local SQLite database, matching the lightweight approach used in Epicurus AI
 - automatic first-run schema initialization and demo inventory seeding, including cellar bin support
 - inventory write/update/event endpoints for bottle lifecycle tracking
-- persisted photo-intake jobs with reprocess, review, edit, and approve flow, ready for a future vision step
+- persisted photo-intake jobs with reprocess, review, edit, and approve flow
+- multi-bottle intake candidates with per-bottle approve or reject decisions
+- OpenAI Responses API wiring for image-based extraction when `OPENAI_API_KEY` is set, with text heuristics as a fallback
 
-The next implementation step is enriching the intake pipeline with real image extraction and then mapping CellarTracker exports more completely into the SQLite model.
+The next implementation step is improving image upload/storage and then mapping CellarTracker exports more completely into the SQLite model.

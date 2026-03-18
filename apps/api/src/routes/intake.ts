@@ -1,14 +1,11 @@
 import type { FastifyInstance } from "fastify";
 import {
-  createInventoryItemRequestSchema,
+  approveIntakeJobRequestSchema,
   createIntakeRequestSchema,
   intakeJobQuerySchema,
-  type CreateInventoryItemRequest,
   updateIntakeCandidateSchema
 } from "@bacchus/domain";
 import type { BacchusAppContext } from "../lib/appContext.js";
-
-const approveIntakeJobSchema = createInventoryItemRequestSchema.partial();
 
 function omitUndefined<T extends Record<string, unknown>>(value: T): Partial<T> {
   return Object.fromEntries(
@@ -26,7 +23,7 @@ export function intakeRoutes(context: BacchusAppContext) {
         job,
         nextStep:
           job.status === "needs_review"
-            ? "Review and approve the candidate to add bottles into inventory."
+            ? "Review each detected bottle candidate, reject any extras, then approve the ones you want to add."
             : "Awaiting richer extraction before approval."
       });
     });
@@ -50,18 +47,19 @@ export function intakeRoutes(context: BacchusAppContext) {
       return { job };
     });
 
-    app.patch("/jobs/:id/candidate", async (request, reply) => {
-      const params = request.params as { id: string };
+    app.patch("/jobs/:id/candidates/:candidateId", async (request, reply) => {
+      const params = request.params as { id: string; candidateId: string };
       const patch = omitUndefined(
         updateIntakeCandidateSchema.parse(request.body ?? {})
       );
       const job = await context.inventoryStore.updateIntakeJobCandidate(
         params.id,
+        params.candidateId,
         patch
       );
 
       if (!job) {
-        return reply.notFound("Intake job not found.");
+        return reply.notFound("Intake job or candidate not found.");
       }
 
       return { job };
@@ -80,17 +78,17 @@ export function intakeRoutes(context: BacchusAppContext) {
 
     app.post("/jobs/:id/approve", async (request, reply) => {
       const params = request.params as { id: string };
-      const overrides = omitUndefined(
-        approveIntakeJobSchema.parse(request.body ?? {})
-      ) as Partial<CreateInventoryItemRequest>;
+      const approvalRequest = omitUndefined(
+        approveIntakeJobRequestSchema.parse(request.body ?? {})
+      );
       const approved = await context.inventoryStore.approveIntakeJob(
         params.id,
-        overrides
+        approvalRequest
       );
 
       if (!approved) {
         return reply.badRequest(
-          "Unable to approve the intake job. Add overrides for missing bottle fields."
+          "Unable to approve the selected bottle candidates. Add missing bottle fields or choose valid pending candidates."
         );
       }
 

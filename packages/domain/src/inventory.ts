@@ -38,6 +38,12 @@ export const intakeJobStatusSchema = z.enum([
   "failed"
 ]);
 
+export const intakeCandidateDecisionSchema = z.enum([
+  "pending",
+  "approved",
+  "rejected"
+]);
+
 export const inventoryRecordSchema = z.object({
   id: z.string(),
   category: inventoryCategorySchema,
@@ -145,6 +151,9 @@ export const inventoryEventSchema = z.object({
 });
 
 export const intakeCandidateSchema = z.object({
+  id: z.string().min(1),
+  decision: intakeCandidateDecisionSchema.default("pending"),
+  approvedItemIds: z.array(z.string()).default([]),
   category: inventoryCategorySchema,
   producer: z.string().optional(),
   label: z.string().optional(),
@@ -167,14 +176,26 @@ export const intakeJobSchema = z.object({
   quantity: z.number().int().positive(),
   location: z.string().optional(),
   images: z.array(intakeImageSchema),
-  candidate: intakeCandidateSchema.optional(),
+  candidates: z.array(intakeCandidateSchema).default([]),
   approvedItemIds: z.array(z.string()).default([]),
   error: z.string().optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime()
 });
 
-export const updateIntakeCandidateSchema = intakeCandidateSchema.partial();
+export const updateIntakeCandidateSchema = intakeCandidateSchema
+  .omit({
+    id: true,
+    approvedItemIds: true
+  })
+  .partial();
+
+export const approveIntakeJobRequestSchema = z.object({
+  candidateIds: z.array(z.string().min(1)).min(1).optional(),
+  overridesByCandidateId: z
+    .record(createInventoryItemRequestSchema.partial())
+    .optional()
+});
 
 export const intakeJobQuerySchema = z.object({
   status: intakeJobStatusSchema.optional()
@@ -184,6 +205,9 @@ export type InventoryCategory = z.infer<typeof inventoryCategorySchema>;
 export type InventoryStatus = z.infer<typeof inventoryStatusSchema>;
 export type InventoryEventType = z.infer<typeof inventoryEventTypeSchema>;
 export type IntakeJobStatus = z.infer<typeof intakeJobStatusSchema>;
+export type IntakeCandidateDecision = z.infer<
+  typeof intakeCandidateDecisionSchema
+>;
 export type InventoryRecord = z.infer<typeof inventoryRecordSchema>;
 export type InventoryQuery = z.infer<typeof inventoryQuerySchema>;
 export type CreateIntakeRequest = z.infer<typeof createIntakeRequestSchema>;
@@ -201,6 +225,9 @@ export type IntakeCandidate = z.infer<typeof intakeCandidateSchema>;
 export type IntakeJob = z.infer<typeof intakeJobSchema>;
 export type UpdateIntakeCandidate = z.infer<typeof updateIntakeCandidateSchema>;
 export type IntakeJobQuery = z.infer<typeof intakeJobQuerySchema>;
+export type ApproveIntakeJobRequest = z.infer<
+  typeof approveIntakeJobRequestSchema
+>;
 
 export function getInventoryDisplayName(record: InventoryRecord): string {
   return [record.vintage, record.producer, record.label].filter(Boolean).join(" ");
