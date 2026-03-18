@@ -6,6 +6,31 @@ export type BacchusToolDefinition = {
 
 export const bacchusToolCatalog: BacchusToolDefinition[] = [
   {
+    name: "extract_intake_from_uploads",
+    description: "Create a bottle-review job from images uploaded in ChatGPT and return detected wine or liquor candidates by number.",
+    inputExample: {
+      message: "Add these bottles to my bar inventory.",
+      openaiFileIdRefs: ["file-uploaded-in-chatgpt"]
+    }
+  },
+  {
+    name: "review_intake_candidate",
+    description: "Correct, keep pending, or reject one extracted bottle candidate before it is added to inventory.",
+    inputExample: {
+      jobId: "intake_123",
+      candidateId: "candidate_2",
+      decision: "rejected"
+    }
+  },
+  {
+    name: "approve_intake_candidates",
+    description: "Approve one or more confirmed bottle candidates and write them into Bacchus inventory.",
+    inputExample: {
+      jobId: "intake_123",
+      candidateIds: ["candidate_1", "candidate_2"]
+    }
+  },
+  {
     name: "search_inventory",
     description: "Search current wine, spirits, and pantry inventory by category, status, or location.",
     inputExample: {

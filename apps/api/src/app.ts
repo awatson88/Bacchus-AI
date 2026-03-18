@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import sensible from "@fastify/sensible";
 import type { BacchusAppContext } from "./lib/appContext.js";
+import { chatGptRoutes } from "./routes/chatgpt.js";
 import { healthRoutes } from "./routes/health.js";
 import { importRoutes } from "./routes/imports.js";
 import { intakeRoutes } from "./routes/intake.js";
@@ -22,6 +23,7 @@ export function buildApp(context: BacchusAppContext) {
     await context.inventoryStore.dispose();
   });
 
+  app.register(chatGptRoutes(context), { prefix: "/api/v1/chatgpt" });
   app.register(healthRoutes(context), { prefix: "/health" });
   app.register(inventoryRoutes(context), { prefix: "/api/v1/inventory" });
   app.register(intakeRoutes(context), { prefix: "/api/v1/intake" });

@@ -30,6 +30,12 @@ Optional image extraction configuration:
 - set `OPENAI_API_KEY` to enable OpenAI-powered bottle extraction from image URLs
 - override `OPENAI_VISION_MODEL` if you want to swap the default multimodal model
 
+Custom GPT / ChatGPT Actions setup:
+
+- OpenAPI schema: `http://localhost:3000/api/v1/chatgpt/openapi.json`
+- Starter GPT instructions: `http://localhost:3000/api/v1/chatgpt/instructions`
+- Setup guide: `docs/bacchus-custom-gpt.md`
+
 ## Current status
 
 This first scaffold includes:
@@ -43,5 +49,6 @@ This first scaffold includes:
 - persisted photo-intake jobs with reprocess, review, edit, and approve flow
 - multi-bottle intake candidates with per-bottle approve or reject decisions
 - OpenAI Responses API wiring for image-based extraction when `OPENAI_API_KEY` is set, with text heuristics as a fallback
+- ChatGPT Action-friendly intake endpoints and a served OpenAPI schema for uploaded screenshot flows
 
 The next implementation step is improving image upload/storage and then mapping CellarTracker exports more completely into the SQLite model.

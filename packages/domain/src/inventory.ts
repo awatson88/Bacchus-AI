@@ -88,6 +88,18 @@ export const intakeImageSchema = z
     message: "Each image needs either a URL or a storage key."
   });
 
+export const openAiFileReferenceSchema = z.object({
+  name: z.string().min(1),
+  id: z.string().min(1),
+  mime_type: z.string().min(1),
+  download_link: z.string().url()
+});
+
+export const openAiFileReferenceInputSchema = z.union([
+  z.string().min(1),
+  openAiFileReferenceSchema
+]);
+
 export const createIntakeRequestSchema = z.object({
   message: z.string().min(1),
   quantity: z.number().int().positive().max(24).default(1),
@@ -197,6 +209,17 @@ export const approveIntakeJobRequestSchema = z.object({
     .optional()
 });
 
+export const createChatGptIntakeJobRequestSchema = z.object({
+  message: z.string().min(1).default("Add these bottles to my inventory."),
+  location: z.string().optional(),
+  openaiFileIdRefs: z.array(openAiFileReferenceInputSchema).min(1).max(10)
+});
+
+export const reviewChatGptIntakeCandidateRequestSchema =
+  updateIntakeCandidateSchema.extend({
+    candidateId: z.string().min(1)
+  });
+
 export const intakeJobQuerySchema = z.object({
   status: intakeJobStatusSchema.optional()
 });
@@ -227,6 +250,16 @@ export type UpdateIntakeCandidate = z.infer<typeof updateIntakeCandidateSchema>;
 export type IntakeJobQuery = z.infer<typeof intakeJobQuerySchema>;
 export type ApproveIntakeJobRequest = z.infer<
   typeof approveIntakeJobRequestSchema
+>;
+export type OpenAiFileReference = z.infer<typeof openAiFileReferenceSchema>;
+export type OpenAiFileReferenceInput = z.infer<
+  typeof openAiFileReferenceInputSchema
+>;
+export type CreateChatGptIntakeJobRequest = z.infer<
+  typeof createChatGptIntakeJobRequestSchema
+>;
+export type ReviewChatGptIntakeCandidateRequest = z.infer<
+  typeof reviewChatGptIntakeCandidateRequestSchema
 >;
 
 export function getInventoryDisplayName(record: InventoryRecord): string {
