@@ -34,6 +34,7 @@ Custom GPT / ChatGPT Actions setup:
 
 - OpenAPI schema: `http://localhost:3000/api/v1/chatgpt/openapi.json`
 - Starter GPT instructions: `http://localhost:3000/api/v1/chatgpt/instructions`
+- Paste-ready GPT prompt: `http://localhost:3000/api/v1/chatgpt/instructions.txt`
 - Setup guide: `docs/bacchus-custom-gpt.md`
 
 ## Current status

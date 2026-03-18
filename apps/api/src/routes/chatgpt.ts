@@ -9,6 +9,10 @@ import {
   type OpenAiFileReference,
   type OpenAiFileReferenceInput
 } from "@bacchus/domain";
+import {
+  getBacchusConversationStarters,
+  getBacchusCustomGptInstructions
+} from "@bacchus/chatgpt";
 import type { BacchusAppContext } from "../lib/appContext.js";
 import { buildChatGptActionOpenApiSpec } from "../lib/chatgptActionSpec.js";
 
@@ -94,14 +98,14 @@ export function chatGptRoutes(context: BacchusAppContext) {
         name: "Bacchus",
         summary:
           "Use Bacchus to extract bottles from uploaded photos, confirm each candidate with the user, then approve selected bottles into inventory.",
-        guidelines: [
-          "When a user uploads bottle photos and asks to add them, call extractIntakeFromUploads first.",
-          "Show the extracted candidates by number and ask which ones to add, skip, or correct.",
-          "Use reviewIntakeCandidate to reject or correct a candidate before approval.",
-          "Use approveIntakeCandidates only after the user confirms which bottles should be added.",
-          "Use searchInventory, suggestWinesForMeal, suggestCocktails, and getDrinkNowCandidates for follow-up cellar and bar questions."
-        ]
+        instructions: getBacchusCustomGptInstructions(),
+        conversationStarters: getBacchusConversationStarters()
       };
+    });
+
+    app.get("/instructions.txt", async (request, reply) => {
+      reply.header("content-type", "text/plain; charset=utf-8");
+      return getBacchusCustomGptInstructions();
     });
 
     app.post("/intake/extract", async (request, reply) => {

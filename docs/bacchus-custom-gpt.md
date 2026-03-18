@@ -24,6 +24,7 @@ For local testing, the endpoint is:
 
 - OpenAPI schema: `/api/v1/chatgpt/openapi.json`
 - Starter GPT instructions: `/api/v1/chatgpt/instructions`
+- Paste-ready instructions text: `/api/v1/chatgpt/instructions.txt`
 
 ## Starter GPT Instructions
 

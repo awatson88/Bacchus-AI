@@ -11,6 +11,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@bacchus/chatgpt": "file:../chatgpt",
     "@bacchus/db": "file:../../packages/db",
     "@bacchus/domain": "file:../../packages/domain",
     "@fastify/cors": "^10.0.2",
