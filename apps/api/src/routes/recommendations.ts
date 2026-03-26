@@ -4,10 +4,10 @@ import {
   recommendCocktails,
   recommendWines,
   winePairingRequestSchema
-} from "@bacchus/domain";
-import type { BacchusAppContext } from "../lib/appContext.js";
+} from "@bartendergpt/domain";
+import type { BartenderGptAppContext } from "../lib/appContext.js";
 
-export function recommendationRoutes(context: BacchusAppContext) {
+export function recommendationRoutes(context: BartenderGptAppContext) {
   return async function recommendationPlugin(app: FastifyInstance) {
     app.post("/wine", async (request) => {
       const payload = winePairingRequestSchema.parse(request.body);

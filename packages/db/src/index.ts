@@ -4,8 +4,9 @@ import { DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
 
 export const databaseProvider = "sqlite";
-export const databasePathEnvVar = "BACCHUS_DB_PATH";
-export const defaultDatabasePath = "./bacchus_ai.db";
+export const databasePathEnvVar = "BARTENDERGPT_DB_PATH";
+export const legacyDatabasePathEnvVar = "BACCHUS_DB_PATH";
+export const defaultDatabasePath = "./bartendergpt_ai.db";
 const packageDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(packageDir, "../../..");
 
@@ -99,7 +100,9 @@ CREATE INDEX IF NOT EXISTS idx_intake_images_job
 `;
 
 export function resolveDatabasePath(
-  pathOverride = process.env[databasePathEnvVar] ?? defaultDatabasePath
+  pathOverride = process.env[databasePathEnvVar] ??
+    process.env[legacyDatabasePathEnvVar] ??
+    defaultDatabasePath
 ): string {
   return resolve(repoRoot, pathOverride);
 }

@@ -1,10 +1,10 @@
-export type BacchusToolDefinition = {
+export type BartenderGptToolDefinition = {
   name: string;
   description: string;
   inputExample: Record<string, unknown>;
 };
 
-export const bacchusToolCatalog: BacchusToolDefinition[] = [
+export const bartenderGptToolCatalog: BartenderGptToolDefinition[] = [
   {
     name: "extract_intake_from_uploads",
     description: "Create a bottle-review job from images uploaded in ChatGPT and return detected wine or liquor candidates by number.",
@@ -24,7 +24,7 @@ export const bacchusToolCatalog: BacchusToolDefinition[] = [
   },
   {
     name: "approve_intake_candidates",
-    description: "Approve one or more confirmed bottle candidates and write them into Bacchus inventory.",
+    description: "Approve one or more confirmed bottle candidates and write them into BartenderGPT inventory.",
     inputExample: {
       jobId: "intake_123",
       candidateIds: ["candidate_1", "candidate_2"]

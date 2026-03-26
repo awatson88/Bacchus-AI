@@ -1,5 +1,5 @@
 import { parse } from "csv-parse/sync";
-import type { InventoryRecord } from "@bacchus/domain";
+import type { InventoryRecord } from "@bartendergpt/domain";
 
 type ParsedCsvRow = Record<string, string>;
 

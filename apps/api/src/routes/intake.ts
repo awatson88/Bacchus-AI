@@ -4,8 +4,8 @@ import {
   createIntakeRequestSchema,
   intakeJobQuerySchema,
   updateIntakeCandidateSchema
-} from "@bacchus/domain";
-import type { BacchusAppContext } from "../lib/appContext.js";
+} from "@bartendergpt/domain";
+import type { BartenderGptAppContext } from "../lib/appContext.js";
 
 function omitUndefined<T extends Record<string, unknown>>(value: T): Partial<T> {
   return Object.fromEntries(
@@ -13,7 +13,7 @@ function omitUndefined<T extends Record<string, unknown>>(value: T): Partial<T> 
   ) as Partial<T>;
 }
 
-export function intakeRoutes(context: BacchusAppContext) {
+export function intakeRoutes(context: BartenderGptAppContext) {
   return async function intakePlugin(app: FastifyInstance) {
     app.post("/jobs", async (request, reply) => {
       const payload = createIntakeRequestSchema.parse(request.body);

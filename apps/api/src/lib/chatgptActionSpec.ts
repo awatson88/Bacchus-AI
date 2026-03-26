@@ -2,10 +2,10 @@ export function buildChatGptActionOpenApiSpec(serverUrl: string) {
   return {
     openapi: "3.1.0",
     info: {
-      title: "Bacchus AI",
+      title: "BartenderGPT",
       version: "0.1.0",
       description:
-        "Actions for extracting bottles from uploaded photos, reviewing candidates, approving inventory updates, and querying Bacchus inventory."
+        "Actions for extracting bottles from uploaded photos, reviewing candidates, approving inventory updates, and querying BartenderGPT inventory."
     },
     components: {
       securitySchemes: {
@@ -32,7 +32,7 @@ export function buildChatGptActionOpenApiSpec(serverUrl: string) {
           operationId: "extractIntakeFromUploads",
           summary: "Extract bottle candidates from uploaded images.",
           description:
-            "Create a Bacchus intake review job from files uploaded in ChatGPT. Use when the user wants to add bottles from screenshots or shopping photos.",
+            "Create a BartenderGPT intake review job from files uploaded in ChatGPT. Use when the user wants to add bottles from screenshots or shopping photos.",
           "x-openai-isConsequential": false,
           requestBody: {
             required: true,
@@ -226,7 +226,7 @@ export function buildChatGptActionOpenApiSpec(serverUrl: string) {
       "/api/v1/inventory/items": {
         get: {
           operationId: "searchInventory",
-          summary: "Search Bacchus inventory.",
+          summary: "Search BartenderGPT inventory.",
           description:
             "Search current wine and liquor inventory by category, status, or location.",
           parameters: [

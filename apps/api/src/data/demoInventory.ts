@@ -1,4 +1,4 @@
-import type { InventoryRecord } from "@bacchus/domain";
+import type { InventoryRecord } from "@bartendergpt/domain";
 
 export const demoInventory: InventoryRecord[] = [
   {

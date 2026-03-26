@@ -5,10 +5,10 @@ import {
   getDrinkWindowUrgency,
   inventoryQuerySchema,
   updateInventoryItemRequestSchema
-} from "@bacchus/domain";
-import type { BacchusAppContext } from "../lib/appContext.js";
+} from "@bartendergpt/domain";
+import type { BartenderGptAppContext } from "../lib/appContext.js";
 
-export function inventoryRoutes(context: BacchusAppContext) {
+export function inventoryRoutes(context: BartenderGptAppContext) {
   return async function inventoryPlugin(app: FastifyInstance) {
     app.get("/items", async (request) => {
       const query = inventoryQuerySchema.parse(request.query);

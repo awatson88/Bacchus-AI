@@ -1,6 +1,6 @@
-# Bacchus AI
+# BartenderGPT
 
-Bacchus AI is a private household inventory and recommendation system for wine, spirits, liqueurs, aperitifs, bitters, syrups, and cocktail pantry items.
+BartenderGPT is a private household inventory and recommendation system for wine, spirits, liqueurs, aperitifs, bitters, syrups, and cocktail pantry items.
 
 The near-term goal is simple:
 
@@ -27,7 +27,7 @@ The near-term goal is simple:
 
 Optional image extraction configuration:
 
-- set `BACCHUS_API_TOKEN` before exposing the API publicly so ChatGPT and any other clients authenticate with a Bearer token
+- set `BARTENDERGPT_API_TOKEN` before exposing the API publicly so ChatGPT and any other clients authenticate with a Bearer token
 - set `OPENAI_API_KEY` to enable OpenAI-powered bottle extraction from image URLs
 - override `OPENAI_VISION_MODEL` if you want to swap the default multimodal model
 
@@ -36,7 +36,7 @@ Custom GPT / ChatGPT Actions setup:
 - OpenAPI schema: `http://localhost:3000/api/v1/chatgpt/openapi.json`
 - Starter GPT instructions: `http://localhost:3000/api/v1/chatgpt/instructions`
 - Paste-ready GPT prompt: `http://localhost:3000/api/v1/chatgpt/instructions.txt`
-- Setup guide: `docs/bacchus-custom-gpt.md`
+- Setup guide: `docs/bartendergpt-custom-gpt.md`
 
 ## Current status
 

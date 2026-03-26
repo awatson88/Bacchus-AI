@@ -5,10 +5,10 @@
     "moduleResolution": "NodeNext",
     "baseUrl": ".",
     "paths": {
-      "@bacchus/domain": [
+      "@bartendergpt/domain": [
         "packages/domain/src/index.ts"
       ],
-      "@bacchus/db": [
+      "@bartendergpt/db": [
         "packages/db/src/index.ts"
       ]
     },

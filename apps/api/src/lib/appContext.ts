@@ -1,6 +1,6 @@
 import type { InventoryStore, StoreMode } from "./inventoryStore.js";
 
-export type BacchusAppContext = {
+export type BartenderGptAppContext = {
   inventoryStore: InventoryStore;
   storeMode: StoreMode;
 };

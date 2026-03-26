@@ -3,7 +3,7 @@ import {
   initializeDatabase,
   openDatabase,
   resolveDatabasePath
-} from "@bacchus/db";
+} from "@bartendergpt/db";
 import type {
   ApproveIntakeJobRequest,
   CreateIntakeRequest,
@@ -19,10 +19,10 @@ import type {
   InventoryRecord,
   UpdateIntakeCandidate,
   UpdateInventoryItemRequest
-} from "@bacchus/domain";
-import { createInventoryItemRequestSchema } from "@bacchus/domain";
+} from "@bartendergpt/domain";
+import { createInventoryItemRequestSchema } from "@bartendergpt/domain";
 import { demoInventory } from "../data/demoInventory.js";
-import type { BacchusAppContext } from "./appContext.js";
+import type { BartenderGptAppContext } from "./appContext.js";
 import { extractIntakeCandidates } from "./intakeExtraction.js";
 
 export type StoreMode = "memory" | "sqlite";
@@ -1352,7 +1352,7 @@ function sanitizeCreateItemOverrides(
     : {};
 }
 
-export async function createAppContext(): Promise<BacchusAppContext> {
+export async function createAppContext(): Promise<BartenderGptAppContext> {
   try {
     const database = openDatabase();
     initializeDatabase(database);

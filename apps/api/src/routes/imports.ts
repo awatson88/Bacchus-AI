@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import type { BacchusAppContext } from "../lib/appContext.js";
+import type { BartenderGptAppContext } from "../lib/appContext.js";
 import { parseCellarTrackerCsv } from "../lib/cellarTrackerImport.js";
 
 const cellarTrackerImportSchema = z.object({
@@ -9,7 +9,7 @@ const cellarTrackerImportSchema = z.object({
   maxPreviewRows: z.number().int().positive().max(25).default(10)
 });
 
-export function importRoutes(context: BacchusAppContext) {
+export function importRoutes(context: BartenderGptAppContext) {
   return async function importPlugin(app: FastifyInstance) {
     app.post("/cellartracker/preview", async (request) => {
       const payload = cellarTrackerImportSchema.parse(request.body);

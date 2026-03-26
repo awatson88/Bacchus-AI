@@ -1,23 +1,23 @@
-import { bacchusToolCatalog } from "./tools.js";
+import { bartenderGptToolCatalog } from "./tools.js";
 import {
-  bacchusConversationStarters,
-  bacchusCustomGptInstructions
+  bartenderGptConversationStarters,
+  bartenderGptCustomGptInstructions
 } from "./customGpt.js";
 
-export function getBacchusTools() {
-  return bacchusToolCatalog;
+export function getBartenderGptTools() {
+  return bartenderGptToolCatalog;
 }
 
-export function getBacchusCustomGptInstructions() {
-  return bacchusCustomGptInstructions;
+export function getBartenderGptCustomGptInstructions() {
+  return bartenderGptCustomGptInstructions;
 }
 
-export function getBacchusConversationStarters() {
-  return bacchusConversationStarters;
+export function getBartenderGptConversationStarters() {
+  return bartenderGptConversationStarters;
 }
 
 if (process.env.NODE_ENV !== "production") {
   console.log(
-    `Bacchus ChatGPT tool scaffold loaded with ${bacchusToolCatalog.length} tools.`
+    `BartenderGPT ChatGPT tool scaffold loaded with ${bartenderGptToolCatalog.length} tools.`
   );
 }

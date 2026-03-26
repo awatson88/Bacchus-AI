@@ -1,5 +1,5 @@
 {
-  "name": "bacchus-ai",
+  "name": "bartendergpt",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -12,7 +12,7 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "tsc -b --clean",
-    "db:init": "npm run db:init --workspace @bacchus/db",
+    "db:init": "npm run db:init --workspace @bartendergpt/db",
     "dev:api": "tsx watch apps/api/src/index.ts",
     "dev:chatgpt": "tsx watch apps/chatgpt/src/index.ts",
     "start:api": "node apps/api/dist/index.js",

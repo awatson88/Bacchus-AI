@@ -1,4 +1,4 @@
-import type { CreateIntakeRequest, IntakeCandidate } from "@bacchus/domain";
+import type { CreateIntakeRequest, IntakeCandidate } from "@bartendergpt/domain";
 
 type ExtractedBottle = {
   category: IntakeCandidate["category"];

@@ -1,20 +1,20 @@
-# Bacchus Custom GPT Setup
+# BartenderGPT Custom GPT Setup
 
 ## Goal
 
-Use a dedicated `Bacchus` Custom GPT in ChatGPT to:
+Use a dedicated `BartenderGPT` Custom GPT in ChatGPT to:
 
 - accept uploaded bottle photos or screenshots
 - extract wine and liquor bottle candidates
 - confirm which detected bottles to add
-- write approved bottles into Bacchus inventory
+- write approved bottles into BartenderGPT inventory
 - answer follow-up inventory, wine pairing, and cocktail questions
 
 ## Action import URL
 
-Once the API is deployed, import the Bacchus GPT Actions schema from:
+Once the API is deployed, import the BartenderGPT GPT Actions schema from:
 
-`https://YOUR-BACCHUS-DOMAIN/api/v1/chatgpt/openapi.json`
+`https://YOUR-BARTENDERGPT-DOMAIN/api/v1/chatgpt/openapi.json`
 
 For local testing, the endpoint is:
 
@@ -22,9 +22,9 @@ For local testing, the endpoint is:
 
 ## Authentication
 
-Set a bearer token in your `.env` before exposing Bacchus publicly:
+Set a bearer token in your `.env` before exposing BartenderGPT publicly:
 
-`BACCHUS_API_TOKEN=your-long-random-token`
+`BARTENDERGPT_API_TOKEN=your-long-random-token`
 
 The GPT Actions schema now advertises bearer authentication, so after importing the OpenAPI URL into your Custom GPT, paste that same token into the GPT action auth field.
 
@@ -39,7 +39,7 @@ The GPT Actions schema now advertises bearer authentication, so after importing 
 Use this as the first draft for the Custom GPT instructions:
 
 ```text
-You are Bacchus, a household wine and liquor cellar assistant.
+You are BartenderGPT, a household wine and liquor cellar assistant.
 
 When the user uploads bottle photos or screenshots and asks to add them:
 1. Call extractIntakeFromUploads.
@@ -58,10 +58,10 @@ Be concise, but always show the numbered bottle list before approving inventory 
 
 ## Expected user flow
 
-1. User opens the Bacchus GPT.
+1. User opens the BartenderGPT GPT.
 2. User uploads several photos from Binny's and says, `Add these bottles to my bar inventory.`
-3. Bacchus calls `extractIntakeFromUploads`.
-4. Bacchus responds with something like:
+3. BartenderGPT calls `extractIntakeFromUploads`.
+4. BartenderGPT responds with something like:
 
 ```text
 I found 3 bottles:
@@ -73,8 +73,8 @@ Which ones should I add?
 ```
 
 5. User replies, `Add 1 and 2. Skip 3.`
-6. Bacchus calls `reviewIntakeCandidate` for bottle 3 and `approveIntakeCandidates` for 1 and 2.
-7. Bacchus confirms the created inventory records.
+6. BartenderGPT calls `reviewIntakeCandidate` for bottle 3 and `approveIntakeCandidates` for 1 and 2.
+7. BartenderGPT confirms the created inventory records.
 
 ## Current limitation
 

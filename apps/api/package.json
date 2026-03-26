@@ -1,5 +1,5 @@
 {
-  "name": "@bacchus/api",
+  "name": "@bartendergpt/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,9 +11,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@bacchus/chatgpt": "file:../chatgpt",
-    "@bacchus/db": "file:../../packages/db",
-    "@bacchus/domain": "file:../../packages/domain",
+    "@bartendergpt/chatgpt": "file:../chatgpt",
+    "@bartendergpt/db": "file:../../packages/db",
+    "@bartendergpt/domain": "file:../../packages/domain",
     "@fastify/cors": "^10.0.2",
     "@fastify/sensible": "^6.0.3",
     "csv-parse": "^5.6.0",

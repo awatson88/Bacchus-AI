@@ -8,12 +8,12 @@ import {
   type IntakeJob,
   type OpenAiFileReference,
   type OpenAiFileReferenceInput
-} from "@bacchus/domain";
+} from "@bartendergpt/domain";
 import {
-  getBacchusConversationStarters,
-  getBacchusCustomGptInstructions
-} from "@bacchus/chatgpt";
-import type { BacchusAppContext } from "../lib/appContext.js";
+  getBartenderGptConversationStarters,
+  getBartenderGptCustomGptInstructions
+} from "@bartendergpt/chatgpt";
+import type { BartenderGptAppContext } from "../lib/appContext.js";
 import { buildChatGptActionOpenApiSpec } from "../lib/chatgptActionSpec.js";
 
 function omitUndefined<T extends Record<string, unknown>>(value: T): Partial<T> {
@@ -87,7 +87,7 @@ function buildServerUrl(request: {
   return `${protocol}://${hostValue}`;
 }
 
-export function chatGptRoutes(context: BacchusAppContext) {
+export function chatGptRoutes(context: BartenderGptAppContext) {
   return async function chatGptPlugin(app: FastifyInstance) {
     app.get("/openapi.json", async (request, reply) => {
       return reply.send(buildChatGptActionOpenApiSpec(buildServerUrl(request)));
@@ -95,17 +95,17 @@ export function chatGptRoutes(context: BacchusAppContext) {
 
     app.get("/instructions", async () => {
       return {
-        name: "Bacchus",
+        name: "BartenderGPT",
         summary:
-          "Use Bacchus to extract bottles from uploaded photos, confirm each candidate with the user, then approve selected bottles into inventory.",
-        instructions: getBacchusCustomGptInstructions(),
-        conversationStarters: getBacchusConversationStarters()
+          "Use BartenderGPT to extract bottles from uploaded photos, confirm each candidate with the user, then approve selected bottles into inventory.",
+        instructions: getBartenderGptCustomGptInstructions(),
+        conversationStarters: getBartenderGptConversationStarters()
       };
     });
 
     app.get("/instructions.txt", async (request, reply) => {
       reply.header("content-type", "text/plain; charset=utf-8");
-      return getBacchusCustomGptInstructions();
+      return getBartenderGptCustomGptInstructions();
     });
 
     app.post("/intake/extract", async (request, reply) => {
