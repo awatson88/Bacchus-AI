@@ -7,9 +7,23 @@ export function buildChatGptActionOpenApiSpec(serverUrl: string) {
       description:
         "Actions for extracting bottles from uploaded photos, reviewing candidates, approving inventory updates, and querying Bacchus inventory."
     },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "API token"
+        }
+      }
+    },
     servers: [
       {
         url: serverUrl
+      }
+    ],
+    security: [
+      {
+        bearerAuth: []
       }
     ],
     paths: {

@@ -27,6 +27,7 @@ The near-term goal is simple:
 
 Optional image extraction configuration:
 
+- set `BACCHUS_API_TOKEN` before exposing the API publicly so ChatGPT and any other clients authenticate with a Bearer token
 - set `OPENAI_API_KEY` to enable OpenAI-powered bottle extraction from image URLs
 - override `OPENAI_VISION_MODEL` if you want to swap the default multimodal model
 

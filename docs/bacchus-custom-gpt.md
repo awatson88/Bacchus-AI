@@ -20,6 +20,14 @@ For local testing, the endpoint is:
 
 `http://localhost:3000/api/v1/chatgpt/openapi.json`
 
+## Authentication
+
+Set a bearer token in your `.env` before exposing Bacchus publicly:
+
+`BACCHUS_API_TOKEN=your-long-random-token`
+
+The GPT Actions schema now advertises bearer authentication, so after importing the OpenAPI URL into your Custom GPT, paste that same token into the GPT action auth field.
+
 ## Helpful endpoints
 
 - OpenAPI schema: `/api/v1/chatgpt/openapi.json`
