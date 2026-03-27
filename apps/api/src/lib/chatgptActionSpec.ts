@@ -8,6 +8,7 @@ export function buildChatGptActionOpenApiSpec(serverUrl: string) {
         "Actions for extracting bottles from uploaded photos, reviewing candidates, approving inventory updates, and querying BartenderGPT inventory."
     },
     components: {
+      schemas: {},
       securitySchemes: {
         bearerAuth: {
           type: "http",

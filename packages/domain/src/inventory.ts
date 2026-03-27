@@ -88,16 +88,22 @@ export const intakeImageSchema = z
     message: "Each image needs either a URL or a storage key."
   });
 
-export const openAiFileReferenceSchema = z.object({
-  name: z.string().min(1),
-  id: z.string().min(1),
-  mime_type: z.string().min(1),
-  download_link: z.string().url()
-});
+export const openAiFileReferenceSchema = z
+  .object({
+    name: z.string().min(1).optional(),
+    id: z.string().min(1).optional(),
+    mime_type: z.string().min(1).optional(),
+    mimeType: z.string().min(1).optional(),
+    download_link: z.string().url().optional(),
+    downloadLink: z.string().url().optional(),
+    url: z.string().url().optional()
+  })
+  .passthrough();
 
 export const openAiFileReferenceInputSchema = z.union([
   z.string().min(1),
-  openAiFileReferenceSchema
+  openAiFileReferenceSchema,
+  z.record(z.unknown())
 ]);
 
 export const createIntakeRequestSchema = z.object({

@@ -6,7 +6,6 @@ import {
   reviewChatGptIntakeCandidateRequestSchema,
   type IntakeCandidate,
   type IntakeJob,
-  type OpenAiFileReference,
   type OpenAiFileReferenceInput
 } from "@bartendergpt/domain";
 import {
@@ -16,6 +15,13 @@ import {
 import type { BartenderGptAppContext } from "../lib/appContext.js";
 import { buildChatGptActionOpenApiSpec } from "../lib/chatgptActionSpec.js";
 
+type NormalizedOpenAiFileReference = {
+  id: string;
+  name: string;
+  mime_type: string;
+  download_link: string;
+};
+
 function omitUndefined<T extends Record<string, unknown>>(value: T): Partial<T> {
   return Object.fromEntries(
     Object.entries(value).filter(([, entry]) => entry !== undefined)
@@ -24,14 +30,54 @@ function omitUndefined<T extends Record<string, unknown>>(value: T): Partial<T> 
 
 function normalizeOpenAiFileReferences(
   refs: OpenAiFileReferenceInput[]
-): OpenAiFileReference[] {
-  return refs.filter(
-    (value): value is OpenAiFileReference =>
-      typeof value === "object" &&
-      value !== null &&
-      "download_link" in value &&
-      typeof value.download_link === "string"
-  );
+): NormalizedOpenAiFileReference[] {
+  return refs
+    .map((value, index) => normalizeOpenAiFileReference(value, index))
+    .filter(
+      (value): value is NormalizedOpenAiFileReference => Boolean(value)
+    );
+}
+
+function normalizeOpenAiFileReference(
+  value: OpenAiFileReferenceInput,
+  index: number
+): NormalizedOpenAiFileReference | undefined {
+  if (typeof value === "string") {
+    return undefined;
+  }
+
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+
+  const downloadLink =
+    getStringProperty(value, "download_link") ??
+    getStringProperty(value, "downloadLink") ??
+    getStringProperty(value, "url");
+
+  if (!downloadLink) {
+    return undefined;
+  }
+
+  return {
+    id: getStringProperty(value, "id") ?? `chatgpt_file_${index + 1}`,
+    name: getStringProperty(value, "name") ?? `upload_${index + 1}`,
+    mime_type:
+      getStringProperty(value, "mime_type") ??
+      getStringProperty(value, "mimeType") ??
+      "application/octet-stream",
+    download_link: downloadLink
+  };
+}
+
+function getStringProperty(
+  value: Record<string, unknown>,
+  key: string
+): string | undefined {
+  const property = value[key];
+  return typeof property === "string" && property.length > 0
+    ? property
+    : undefined;
 }
 
 function summarizeCandidate(candidate: IntakeCandidate, index: number) {
@@ -111,6 +157,15 @@ export function chatGptRoutes(context: BartenderGptAppContext) {
     app.post("/intake/extract", async (request, reply) => {
       const payload = createChatGptIntakeJobRequestSchema.parse(request.body);
       const fileRefs = normalizeOpenAiFileReferences(payload.openaiFileIdRefs);
+
+      request.log.info(
+        {
+          message: payload.message,
+          openaiFileIdRefs: payload.openaiFileIdRefs,
+          normalizedFileRefs: fileRefs
+        },
+        "Received ChatGPT intake extract request."
+      );
 
       if (fileRefs.length === 0) {
         return reply.badRequest(
