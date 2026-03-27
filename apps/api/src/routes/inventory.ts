@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import {
+  consumeInventoryItemRequestSchema,
   createInventoryEventRequestSchema,
   createInventoryItemRequestSchema,
   getDrinkWindowUrgency,
@@ -70,6 +71,24 @@ export function inventoryRoutes(context: BartenderGptAppContext) {
       const params = request.params as { id: string };
       const payload = createInventoryEventRequestSchema.parse(request.body);
       const item = await context.inventoryStore.createEvent(params.id, payload);
+
+      if (!item) {
+        return reply.notFound("Inventory item not found.");
+      }
+
+      return { item };
+    });
+
+    app.post("/items/:id/consume", async (request, reply) => {
+      const params = request.params as { id: string };
+      const payload = consumeInventoryItemRequestSchema.parse(request.body ?? {});
+      const item = await context.inventoryStore.createEvent(params.id, {
+        eventType: "consumed",
+        quantityDelta: -1,
+        notes: payload.notes,
+        fillPercent: 0,
+        status: "consumed"
+      });
 
       if (!item) {
         return reply.notFound("Inventory item not found.");

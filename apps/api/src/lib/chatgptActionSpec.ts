@@ -129,6 +129,12 @@ export function buildChatGptActionOpenApiSpec(serverUrl: string) {
                     vintage: {
                       type: "integer"
                     },
+                    country: {
+                      type: "string"
+                    },
+                    region: {
+                      type: "string"
+                    },
                     baseSpirit: {
                       type: "string"
                     },
@@ -149,6 +155,24 @@ export function buildChatGptActionOpenApiSpec(serverUrl: string) {
                     },
                     quantity: {
                       type: "integer"
+                    },
+                    drinkFrom: {
+                      type: "string",
+                      format: "date-time"
+                    },
+                    drinkTo: {
+                      type: "string",
+                      format: "date-time"
+                    },
+                    qualityScore: {
+                      type: "number"
+                    },
+                    estimatedPriceUsd: {
+                      type: "number"
+                    },
+                    priceTier: {
+                      type: "string",
+                      enum: ["everyday", "special", "splurge"]
                     },
                     confidence: {
                       type: "number"
@@ -290,6 +314,46 @@ export function buildChatGptActionOpenApiSpec(serverUrl: string) {
           }
         }
       },
+      "/api/v1/inventory/items/{id}/consume": {
+        post: {
+          operationId: "consumeInventoryItem",
+          summary: "Mark one bottle as consumed.",
+          description:
+            "Use after the user says a specific wine or bottle was opened and finished. Marks one physical bottle record as consumed.",
+          "x-openai-isConsequential": true,
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: {
+                type: "string"
+              }
+            }
+          ],
+          requestBody: {
+            required: false,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: {
+                    notes: {
+                      type: "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          responses: {
+            "200": {
+              description: "Inventory item marked consumed."
+            }
+          }
+        }
+      },
       "/api/v1/recommendations/wine": {
         post: {
           operationId: "suggestWinesForMeal",
@@ -313,6 +377,10 @@ export function buildChatGptActionOpenApiSpec(serverUrl: string) {
                     },
                     weatherSummary: {
                       type: "string"
+                    },
+                    budgetPreference: {
+                      type: "string",
+                      enum: ["everyday", "special", "splurge"]
                     }
                   },
                   required: ["meal"]

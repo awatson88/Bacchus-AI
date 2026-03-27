@@ -44,6 +44,12 @@ export const intakeCandidateDecisionSchema = z.enum([
   "rejected"
 ]);
 
+export const winePriceTierSchema = z.enum([
+  "everyday",
+  "special",
+  "splurge"
+]);
+
 export const inventoryRecordSchema = z.object({
   id: z.string(),
   category: inventoryCategorySchema,
@@ -64,6 +70,8 @@ export const inventoryRecordSchema = z.object({
   drinkFrom: z.string().datetime().optional(),
   drinkTo: z.string().datetime().optional(),
   qualityScore: z.number().min(0).max(100).optional(),
+  estimatedPriceUsd: z.number().positive().max(100000).optional(),
+  priceTier: winePriceTierSchema.optional(),
   confidence: z.number().min(0).max(1).optional(),
   pairingTags: z.array(z.string()).default([]),
   cocktailTags: z.array(z.string()).default([]),
@@ -133,6 +141,8 @@ export const createInventoryItemRequestSchema = z.object({
   drinkFrom: z.string().datetime().optional(),
   drinkTo: z.string().datetime().optional(),
   qualityScore: z.number().min(0).max(100).optional(),
+  estimatedPriceUsd: z.number().positive().max(100000).optional(),
+  priceTier: winePriceTierSchema.optional(),
   confidence: z.number().min(0).max(1).optional(),
   pairingTags: z.array(z.string()).default([]),
   cocktailTags: z.array(z.string()).default([]),
@@ -140,10 +150,28 @@ export const createInventoryItemRequestSchema = z.object({
 });
 
 export const updateInventoryItemRequestSchema = z.object({
+  producer: z.string().min(1).optional(),
+  label: z.string().min(1).optional(),
+  vintage: z.number().int().min(1800).max(2100).optional(),
+  country: z.string().optional(),
+  region: z.string().optional(),
+  style: z.string().optional(),
+  grapeVarieties: z.array(z.string()).optional(),
+  baseSpirit: z.string().optional(),
+  sizeMl: z.number().int().positive().optional(),
+  abv: z.number().min(0).max(100).optional(),
   status: inventoryStatusSchema.optional(),
   fillPercent: z.number().int().min(0).max(100).optional(),
   location: z.string().optional(),
   bin: z.string().optional(),
+  drinkFrom: z.string().datetime().optional(),
+  drinkTo: z.string().datetime().optional(),
+  qualityScore: z.number().min(0).max(100).optional(),
+  estimatedPriceUsd: z.number().positive().max(100000).optional(),
+  priceTier: winePriceTierSchema.optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  pairingTags: z.array(z.string()).optional(),
+  cocktailTags: z.array(z.string()).optional(),
   notes: z.string().optional(),
   eventType: inventoryEventTypeSchema.optional(),
   quantityDelta: z.number().optional()
@@ -176,9 +204,16 @@ export const intakeCandidateSchema = z.object({
   producer: z.string().optional(),
   label: z.string().optional(),
   vintage: z.number().int().min(1800).max(2100).optional(),
+  country: z.string().optional(),
+  region: z.string().optional(),
   baseSpirit: z.string().optional(),
   style: z.string().optional(),
   grapeVarieties: z.array(z.string()).default([]),
+  drinkFrom: z.string().datetime().optional(),
+  drinkTo: z.string().datetime().optional(),
+  qualityScore: z.number().min(0).max(100).optional(),
+  estimatedPriceUsd: z.number().positive().max(100000).optional(),
+  priceTier: winePriceTierSchema.optional(),
   location: z.string().optional(),
   bin: z.string().optional(),
   quantity: z.number().int().positive().default(1),
@@ -230,6 +265,10 @@ export const intakeJobQuerySchema = z.object({
   status: intakeJobStatusSchema.optional()
 });
 
+export const consumeInventoryItemRequestSchema = z.object({
+  notes: z.string().optional()
+});
+
 export type InventoryCategory = z.infer<typeof inventoryCategorySchema>;
 export type InventoryStatus = z.infer<typeof inventoryStatusSchema>;
 export type InventoryEventType = z.infer<typeof inventoryEventTypeSchema>;
@@ -237,6 +276,7 @@ export type IntakeJobStatus = z.infer<typeof intakeJobStatusSchema>;
 export type IntakeCandidateDecision = z.infer<
   typeof intakeCandidateDecisionSchema
 >;
+export type WinePriceTier = z.infer<typeof winePriceTierSchema>;
 export type InventoryRecord = z.infer<typeof inventoryRecordSchema>;
 export type InventoryQuery = z.infer<typeof inventoryQuerySchema>;
 export type CreateIntakeRequest = z.infer<typeof createIntakeRequestSchema>;
@@ -267,9 +307,34 @@ export type CreateChatGptIntakeJobRequest = z.infer<
 export type ReviewChatGptIntakeCandidateRequest = z.infer<
   typeof reviewChatGptIntakeCandidateRequestSchema
 >;
+export type ConsumeInventoryItemRequest = z.infer<
+  typeof consumeInventoryItemRequestSchema
+>;
 
 export function getInventoryDisplayName(record: InventoryRecord): string {
   return [record.vintage, record.producer, record.label].filter(Boolean).join(" ");
+}
+
+export function getEffectiveWinePriceTier(
+  record: Pick<InventoryRecord, "estimatedPriceUsd" | "priceTier">
+): WinePriceTier | undefined {
+  if (record.priceTier) {
+    return record.priceTier;
+  }
+
+  if (record.estimatedPriceUsd === undefined) {
+    return undefined;
+  }
+
+  if (record.estimatedPriceUsd <= 35) {
+    return "everyday";
+  }
+
+  if (record.estimatedPriceUsd <= 80) {
+    return "special";
+  }
+
+  return "splurge";
 }
 
 export function getDrinkWindowUrgency(

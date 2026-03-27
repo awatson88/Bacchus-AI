@@ -18,6 +18,8 @@ export const demoInventory: InventoryRecord[] = [
     drinkFrom: "2024-01-01T00:00:00.000Z",
     drinkTo: "2026-12-31T00:00:00.000Z",
     qualityScore: 95,
+    estimatedPriceUsd: 74,
+    priceTier: "special",
     confidence: 0.99,
     pairingTags: ["red", "bold", "italian", "mushroom", "braised"],
     cocktailTags: [],
@@ -40,6 +42,8 @@ export const demoInventory: InventoryRecord[] = [
     drinkFrom: "2023-01-01T00:00:00.000Z",
     drinkTo: "2028-12-31T00:00:00.000Z",
     qualityScore: 92,
+    estimatedPriceUsd: 48,
+    priceTier: "special",
     confidence: 0.98,
     pairingTags: ["red", "mushroom", "roast chicken", "versatile"],
     cocktailTags: []
@@ -61,6 +65,8 @@ export const demoInventory: InventoryRecord[] = [
     drinkFrom: "2023-06-01T00:00:00.000Z",
     drinkTo: "2026-09-30T00:00:00.000Z",
     qualityScore: 91,
+    estimatedPriceUsd: 29,
+    priceTier: "everyday",
     confidence: 0.98,
     pairingTags: ["white", "crisp", "seafood", "oyster", "fresh"],
     cocktailTags: []
@@ -79,6 +85,8 @@ export const demoInventory: InventoryRecord[] = [
     bin: "Shelf 2",
     status: "sealed",
     qualityScore: 93,
+    estimatedPriceUsd: 95,
+    priceTier: "splurge",
     confidence: 0.97,
     pairingTags: ["sparkling", "aperitif", "fried food", "celebration", "fresh"],
     cocktailTags: []

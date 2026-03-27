@@ -93,6 +93,8 @@ type InventoryItemRow = {
   drink_from: string | null;
   drink_to: string | null;
   quality_score: number | null;
+  estimated_price_usd: number | null;
+  price_tier: InventoryRecord["priceTier"] | null;
   confidence: number | null;
   pairing_tags: string;
   cocktail_tags: string;
@@ -185,6 +187,8 @@ function mapRowToInventoryRecord(row: InventoryItemRow): InventoryRecord {
     drinkFrom: row.drink_from ?? undefined,
     drinkTo: row.drink_to ?? undefined,
     qualityScore: row.quality_score ?? undefined,
+    estimatedPriceUsd: row.estimated_price_usd ?? undefined,
+    priceTier: row.price_tier ?? undefined,
     confidence: row.confidence ?? undefined,
     pairingTags: parseJsonArray(row.pairing_tags),
     cocktailTags: parseJsonArray(row.cocktail_tags),
@@ -200,6 +204,65 @@ function mapEventRow(row: InventoryEventRow): InventoryEvent {
     quantityDelta: row.quantity_delta ?? undefined,
     notes: row.notes ?? undefined,
     createdAt: new Date(row.created_at).toISOString()
+  };
+}
+
+function mapInventoryRecordToDatabaseParams(item: InventoryRecord) {
+  return {
+    id: item.id,
+    category: item.category,
+    producer: item.producer,
+    label: item.label,
+    vintage: item.vintage ?? null,
+    country: item.country ?? null,
+    region: item.region ?? null,
+    style: item.style ?? null,
+    grape_varieties: JSON.stringify(item.grapeVarieties),
+    base_spirit: item.baseSpirit ?? null,
+    size_ml: item.sizeMl ?? null,
+    abv: item.abv ?? null,
+    location: item.location,
+    bin: item.bin ?? null,
+    status: item.status,
+    fill_percent: item.fillPercent ?? null,
+    drink_from: item.drinkFrom ?? null,
+    drink_to: item.drinkTo ?? null,
+    quality_score: item.qualityScore ?? null,
+    estimated_price_usd: item.estimatedPriceUsd ?? null,
+    price_tier: item.priceTier ?? null,
+    confidence: item.confidence ?? null,
+    pairing_tags: JSON.stringify(item.pairingTags),
+    cocktail_tags: JSON.stringify(item.cocktailTags),
+    notes: item.notes ?? null
+  };
+}
+
+function mapInventoryRecordToUpdateParams(item: InventoryRecord) {
+  return {
+    id: item.id,
+    producer: item.producer,
+    label: item.label,
+    vintage: item.vintage ?? null,
+    country: item.country ?? null,
+    region: item.region ?? null,
+    style: item.style ?? null,
+    grape_varieties: JSON.stringify(item.grapeVarieties),
+    base_spirit: item.baseSpirit ?? null,
+    size_ml: item.sizeMl ?? null,
+    abv: item.abv ?? null,
+    location: item.location,
+    bin: item.bin ?? null,
+    status: item.status,
+    fill_percent: item.fillPercent ?? null,
+    drink_from: item.drinkFrom ?? null,
+    drink_to: item.drinkTo ?? null,
+    quality_score: item.qualityScore ?? null,
+    estimated_price_usd: item.estimatedPriceUsd ?? null,
+    price_tier: item.priceTier ?? null,
+    confidence: item.confidence ?? null,
+    pairing_tags: JSON.stringify(item.pairingTags),
+    cocktail_tags: JSON.stringify(item.cocktailTags),
+    notes: item.notes ?? null
   };
 }
 
@@ -265,6 +328,8 @@ function normalizeIntakeCandidate(
     producer: candidate.producer,
     label: candidate.label,
     vintage: candidate.vintage,
+    country: candidate.country,
+    region: candidate.region,
     baseSpirit: candidate.baseSpirit,
     style: candidate.style,
     grapeVarieties: Array.isArray(candidate.grapeVarieties)
@@ -272,6 +337,11 @@ function normalizeIntakeCandidate(
           (entry): entry is string => typeof entry === "string"
         )
       : [],
+    drinkFrom: candidate.drinkFrom,
+    drinkTo: candidate.drinkTo,
+    qualityScore: candidate.qualityScore,
+    estimatedPriceUsd: candidate.estimatedPriceUsd,
+    priceTier: candidate.priceTier,
     location: candidate.location,
     bin: candidate.bin,
     quantity:
@@ -368,6 +438,36 @@ class InMemoryInventoryStore implements InventoryStore {
       return null;
     }
 
+    if (request.producer !== undefined) {
+      item.producer = request.producer;
+    }
+    if (request.label !== undefined) {
+      item.label = request.label;
+    }
+    if (request.vintage !== undefined) {
+      item.vintage = request.vintage;
+    }
+    if (request.country !== undefined) {
+      item.country = request.country;
+    }
+    if (request.region !== undefined) {
+      item.region = request.region;
+    }
+    if (request.style !== undefined) {
+      item.style = request.style;
+    }
+    if (request.grapeVarieties !== undefined) {
+      item.grapeVarieties = request.grapeVarieties;
+    }
+    if (request.baseSpirit !== undefined) {
+      item.baseSpirit = request.baseSpirit;
+    }
+    if (request.sizeMl !== undefined) {
+      item.sizeMl = request.sizeMl;
+    }
+    if (request.abv !== undefined) {
+      item.abv = request.abv;
+    }
     if (request.status !== undefined) {
       item.status = request.status;
     }
@@ -379,6 +479,30 @@ class InMemoryInventoryStore implements InventoryStore {
     }
     if (request.bin !== undefined) {
       item.bin = request.bin;
+    }
+    if (request.drinkFrom !== undefined) {
+      item.drinkFrom = request.drinkFrom;
+    }
+    if (request.drinkTo !== undefined) {
+      item.drinkTo = request.drinkTo;
+    }
+    if (request.qualityScore !== undefined) {
+      item.qualityScore = request.qualityScore;
+    }
+    if (request.estimatedPriceUsd !== undefined) {
+      item.estimatedPriceUsd = request.estimatedPriceUsd;
+    }
+    if (request.priceTier !== undefined) {
+      item.priceTier = request.priceTier;
+    }
+    if (request.confidence !== undefined) {
+      item.confidence = request.confidence;
+    }
+    if (request.pairingTags !== undefined) {
+      item.pairingTags = request.pairingTags;
+    }
+    if (request.cocktailTags !== undefined) {
+      item.cocktailTags = request.cocktailTags;
     }
     if (request.notes !== undefined) {
       item.notes = request.notes;
@@ -634,7 +758,8 @@ class SqliteInventoryStore implements InventoryStore {
     this.listAllStatement = database.prepare(`
       SELECT id, category, producer, label, vintage, country, region, style,
         grape_varieties, base_spirit, size_ml, abv, location, bin, status,
-        fill_percent, drink_from, drink_to, quality_score, confidence,
+        fill_percent, drink_from, drink_to, quality_score, estimated_price_usd,
+        price_tier, confidence,
         pairing_tags, cocktail_tags, notes
       FROM inventory_items
       ORDER BY created_at DESC
@@ -643,7 +768,8 @@ class SqliteInventoryStore implements InventoryStore {
     this.listFilteredStatement = database.prepare(`
       SELECT id, category, producer, label, vintage, country, region, style,
         grape_varieties, base_spirit, size_ml, abv, location, bin, status,
-        fill_percent, drink_from, drink_to, quality_score, confidence,
+        fill_percent, drink_from, drink_to, quality_score, estimated_price_usd,
+        price_tier, confidence,
         pairing_tags, cocktail_tags, notes
       FROM inventory_items
       WHERE
@@ -657,7 +783,8 @@ class SqliteInventoryStore implements InventoryStore {
     this.getByIdStatement = database.prepare(`
       SELECT id, category, producer, label, vintage, country, region, style,
         grape_varieties, base_spirit, size_ml, abv, location, bin, status,
-        fill_percent, drink_from, drink_to, quality_score, confidence,
+        fill_percent, drink_from, drink_to, quality_score, estimated_price_usd,
+        price_tier, confidence,
         pairing_tags, cocktail_tags, notes
       FROM inventory_items
       WHERE id = ?
@@ -668,12 +795,14 @@ class SqliteInventoryStore implements InventoryStore {
       INSERT INTO inventory_items (
         id, category, producer, label, vintage, country, region, style,
         grape_varieties, base_spirit, size_ml, abv, location, bin, status,
-        fill_percent, drink_from, drink_to, quality_score, confidence,
+        fill_percent, drink_from, drink_to, quality_score, estimated_price_usd,
+        price_tier, confidence,
         pairing_tags, cocktail_tags, notes, source_system, updated_at
       ) VALUES (
         @id, @category, @producer, @label, @vintage, @country, @region, @style,
         @grape_varieties, @base_spirit, @size_ml, @abv, @location, @bin, @status,
-        @fill_percent, @drink_from, @drink_to, @quality_score, @confidence,
+        @fill_percent, @drink_from, @drink_to, @quality_score, @estimated_price_usd,
+        @price_tier, @confidence,
         @pairing_tags, @cocktail_tags, @notes, @source_system, datetime('now')
       )
     `);
@@ -681,10 +810,28 @@ class SqliteInventoryStore implements InventoryStore {
     this.updateInventoryStatement = database.prepare(`
       UPDATE inventory_items
       SET
+        producer = @producer,
+        label = @label,
+        vintage = @vintage,
+        country = @country,
+        region = @region,
+        style = @style,
+        grape_varieties = @grape_varieties,
+        base_spirit = @base_spirit,
+        size_ml = @size_ml,
+        abv = @abv,
         location = @location,
         bin = @bin,
         status = @status,
         fill_percent = @fill_percent,
+        drink_from = @drink_from,
+        drink_to = @drink_to,
+        quality_score = @quality_score,
+        estimated_price_usd = @estimated_price_usd,
+        price_tier = @price_tier,
+        confidence = @confidence,
+        pairing_tags = @pairing_tags,
+        cocktail_tags = @cocktail_tags,
         notes = @notes,
         updated_at = datetime('now')
       WHERE id = @id
@@ -824,20 +971,34 @@ class SqliteInventoryStore implements InventoryStore {
 
     const nextItem: InventoryRecord = {
       ...item,
+      producer: request.producer ?? item.producer,
+      label: request.label ?? item.label,
+      vintage: request.vintage ?? item.vintage,
+      country: request.country ?? item.country,
+      region: request.region ?? item.region,
+      style: request.style ?? item.style,
+      grapeVarieties: request.grapeVarieties ?? item.grapeVarieties,
+      baseSpirit: request.baseSpirit ?? item.baseSpirit,
+      sizeMl: request.sizeMl ?? item.sizeMl,
+      abv: request.abv ?? item.abv,
       status: request.status ?? item.status,
       fillPercent: request.fillPercent ?? item.fillPercent,
       location: request.location ?? item.location,
       bin: request.bin ?? item.bin,
+      drinkFrom: request.drinkFrom ?? item.drinkFrom,
+      drinkTo: request.drinkTo ?? item.drinkTo,
+      qualityScore: request.qualityScore ?? item.qualityScore,
+      estimatedPriceUsd:
+        request.estimatedPriceUsd ?? item.estimatedPriceUsd,
+      priceTier: request.priceTier ?? item.priceTier,
+      confidence: request.confidence ?? item.confidence,
+      pairingTags: request.pairingTags ?? item.pairingTags,
+      cocktailTags: request.cocktailTags ?? item.cocktailTags,
       notes: request.notes ?? item.notes
     };
 
     this.updateInventoryStatement.run({
-      id,
-      location: nextItem.location,
-      bin: nextItem.bin ?? null,
-      status: nextItem.status,
-      fill_percent: nextItem.fillPercent ?? null,
-      notes: nextItem.notes ?? null
+      ...mapInventoryRecordToUpdateParams(nextItem)
     });
 
     this.insertEventStatement.run({
@@ -865,12 +1026,7 @@ class SqliteInventoryStore implements InventoryStore {
 
     const nextItem = applyEventToItem({ ...item }, request);
     this.updateInventoryStatement.run({
-      id,
-      location: nextItem.location,
-      bin: nextItem.bin ?? null,
-      status: nextItem.status,
-      fill_percent: nextItem.fillPercent ?? null,
-      notes: nextItem.notes ?? null
+      ...mapInventoryRecordToUpdateParams(nextItem)
     });
 
     this.insertEventStatement.run({
@@ -898,29 +1054,7 @@ class SqliteInventoryStore implements InventoryStore {
 
       for (const item of records) {
         this.insertInventoryStatement.run({
-          id: item.id,
-          category: item.category,
-          producer: item.producer,
-          label: item.label,
-          vintage: item.vintage ?? null,
-          country: item.country ?? null,
-          region: item.region ?? null,
-          style: item.style ?? null,
-          grape_varieties: JSON.stringify(item.grapeVarieties),
-          base_spirit: item.baseSpirit ?? null,
-          size_ml: item.sizeMl ?? null,
-          abv: item.abv ?? null,
-          location: item.location,
-          bin: item.bin ?? null,
-          status: item.status,
-          fill_percent: item.fillPercent ?? null,
-          drink_from: item.drinkFrom ?? null,
-          drink_to: item.drinkTo ?? null,
-          quality_score: item.qualityScore ?? null,
-          confidence: item.confidence ?? null,
-          pairing_tags: JSON.stringify(item.pairingTags),
-          cocktail_tags: JSON.stringify(item.cocktailTags),
-          notes: item.notes ?? null,
+          ...mapInventoryRecordToDatabaseParams(item),
           source_system: sourceSystem
         });
 
@@ -1186,7 +1320,8 @@ class SqliteInventoryStore implements InventoryStore {
     const statement = this.database.prepare(`
       SELECT id, category, producer, label, vintage, country, region, style,
         grape_varieties, base_spirit, size_ml, abv, location, bin, status,
-        fill_percent, drink_from, drink_to, quality_score, confidence,
+        fill_percent, drink_from, drink_to, quality_score, estimated_price_usd,
+        price_tier, confidence,
         pairing_tags, cocktail_tags, notes
       FROM inventory_items
       ORDER BY created_at DESC, rowid DESC
@@ -1262,8 +1397,8 @@ function buildCreateRequestFromCandidate(
     label: overrides?.label ?? candidate?.label,
     quantity: overrides?.quantity ?? candidate?.quantity ?? job.quantity,
     vintage: overrides?.vintage ?? candidate?.vintage,
-    country: overrides?.country,
-    region: overrides?.region,
+    country: overrides?.country ?? candidate?.country,
+    region: overrides?.region ?? candidate?.region,
     style: overrides?.style ?? candidate?.style,
     grapeVarieties: overrides?.grapeVarieties ?? candidate?.grapeVarieties ?? [],
     baseSpirit: overrides?.baseSpirit ?? candidate?.baseSpirit,
@@ -1273,9 +1408,12 @@ function buildCreateRequestFromCandidate(
     bin: overrides?.bin ?? candidate?.bin,
     status: overrides?.status ?? "sealed",
     fillPercent: overrides?.fillPercent,
-    drinkFrom: overrides?.drinkFrom,
-    drinkTo: overrides?.drinkTo,
-    qualityScore: overrides?.qualityScore,
+    drinkFrom: overrides?.drinkFrom ?? candidate?.drinkFrom,
+    drinkTo: overrides?.drinkTo ?? candidate?.drinkTo,
+    qualityScore: overrides?.qualityScore ?? candidate?.qualityScore,
+    estimatedPriceUsd:
+      overrides?.estimatedPriceUsd ?? candidate?.estimatedPriceUsd,
+    priceTier: overrides?.priceTier ?? candidate?.priceTier,
     confidence: overrides?.confidence ?? candidate?.confidence,
     pairingTags: overrides?.pairingTags ?? [],
     cocktailTags: overrides?.cocktailTags ?? [],

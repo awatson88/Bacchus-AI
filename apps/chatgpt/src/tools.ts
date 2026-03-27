@@ -50,18 +50,19 @@ export const bartenderGptToolCatalog: BartenderGptToolDefinition[] = [
   },
   {
     name: "mark_item_consumed",
-    description: "Mark a bottle as finished or empty and append an inventory event.",
+    description: "Mark one physical bottle as finished or consumed and append an inventory event.",
     inputExample: {
       itemId: "wine-barolo-2016"
     }
   },
   {
     name: "suggest_wines_for_meal",
-    description: "Return the best in-stock wine candidates for a meal, mood, and weather.",
+    description: "Return the best in-stock wine candidates for a meal, mood, weather, and budget tier.",
     inputExample: {
       meal: "mushroom pasta",
       mood: "cozy",
-      weatherSummary: "cool and rainy in Chicago"
+      weatherSummary: "cool and rainy in Chicago",
+      budgetPreference: "everyday"
     }
   },
   {

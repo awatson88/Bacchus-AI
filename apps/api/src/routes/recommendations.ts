@@ -18,6 +18,7 @@ export function recommendationRoutes(context: BartenderGptAppContext) {
         meal: payload.meal,
         mood: payload.mood ?? null,
         weatherSummary: payload.weatherSummary ?? null,
+        budgetPreference: payload.budgetPreference ?? null,
         recommendations
       };
     });

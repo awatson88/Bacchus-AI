@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS inventory_items (
   drink_from TEXT,
   drink_to TEXT,
   quality_score REAL,
+  estimated_price_usd REAL,
+  price_tier TEXT,
   confidence REAL,
   pairing_tags TEXT NOT NULL DEFAULT '[]',
   cocktail_tags TEXT NOT NULL DEFAULT '[]',
@@ -130,6 +132,8 @@ export function initializeDatabase(
     "candidates_json",
     "TEXT NOT NULL DEFAULT '[]'"
   );
+  ensureColumn(database, "inventory_items", "estimated_price_usd", "REAL");
+  ensureColumn(database, "inventory_items", "price_tier", "TEXT");
 }
 
 function ensureColumn(

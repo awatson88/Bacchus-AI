@@ -1,15 +1,19 @@
 import { z } from "zod";
 import {
+  getEffectiveWinePriceTier,
   getDrinkWindowUrgency,
   getInventoryDisplayName,
   inventoryRecordSchema,
-  type InventoryRecord
+  winePriceTierSchema,
+  type InventoryRecord,
+  type WinePriceTier
 } from "./inventory.js";
 
 export const winePairingRequestSchema = z.object({
   meal: z.string().min(1),
   mood: z.string().optional(),
   weatherSummary: z.string().optional(),
+  budgetPreference: winePriceTierSchema.optional(),
   maxResults: z.number().int().positive().max(5).default(3)
 });
 
@@ -18,6 +22,8 @@ export const wineRecommendationSchema = z.object({
   displayName: z.string(),
   score: z.number(),
   urgency: z.enum(["past_due", "drink_now", "hold", "unknown"]),
+  estimatedPriceUsd: z.number().positive().optional(),
+  priceTier: winePriceTierSchema.optional(),
   reasons: z.array(z.string())
 });
 
@@ -131,6 +137,66 @@ function getInventoryDescriptor(record: InventoryRecord): string {
   );
 }
 
+function inferBudgetPreference(request: WinePairingRequest): {
+  priceTier?: WinePriceTier;
+  source?: "explicit" | "mood";
+} {
+  if (request.budgetPreference) {
+    return {
+      priceTier: request.budgetPreference,
+      source: "explicit"
+    };
+  }
+
+  const mood = normalize(request.mood);
+  if (!mood) {
+    return {};
+  }
+
+  if (
+    includesAny(mood, [
+      "weekday",
+      "weeknight",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "casual",
+      "easy",
+      "pizza night"
+    ])
+  ) {
+    return {
+      priceTier: "everyday",
+      source: "mood"
+    };
+  }
+
+  if (
+    includesAny(mood, [
+      "date night",
+      "anniversary",
+      "celebration",
+      "special occasion",
+      "fancy",
+      "birthday"
+    ])
+  ) {
+    return {
+      priceTier: "special",
+      source: "mood"
+    };
+  }
+
+  if (includesAny(mood, ["splurge", "treat ourselves", "ball out"])) {
+    return {
+      priceTier: "splurge",
+      source: "mood"
+    };
+  }
+
+  return {};
+}
+
 function scoreWineCandidate(
   record: InventoryRecord,
   request: WinePairingRequest
@@ -139,6 +205,8 @@ function scoreWineCandidate(
   const meal = normalize(request.meal);
   const mood = normalize(request.mood);
   const weather = normalize(request.weatherSummary);
+  const requestedBudget = inferBudgetPreference(request);
+  const priceTier = getEffectiveWinePriceTier(record);
   const reasons: string[] = [];
   let score = 55;
 
@@ -195,6 +263,49 @@ function scoreWineCandidate(
     reasons.push("Sparkling always plays well when the mood is celebratory.");
   }
 
+  if (requestedBudget.priceTier && priceTier) {
+    if (requestedBudget.priceTier === "everyday") {
+      if (priceTier === "everyday") {
+        score += 12;
+        reasons.push("This stays in everyday-bottle territory for a casual night.");
+      } else if (priceTier === "special") {
+        score -= 4;
+        reasons.push("It is a bit nicer than an everyday bottle, so it may be better saved.");
+      } else {
+        score -= 18;
+        reasons.push("This reads more like a splurge bottle than a Tuesday-night pick.");
+      }
+    } else if (requestedBudget.priceTier === "special") {
+      if (priceTier === "special") {
+        score += 10;
+        reasons.push("The bottle value lines up well with a nicer dinner.");
+      } else if (priceTier === "splurge") {
+        score += 4;
+        reasons.push("This leans upscale enough for a bigger occasion.");
+      } else {
+        score -= 8;
+        reasons.push("It may drink more casually than the occasion calls for.");
+      }
+    } else if (requestedBudget.priceTier === "splurge") {
+      if (priceTier === "splurge") {
+        score += 12;
+        reasons.push("This fits the brief for opening something truly special.");
+      } else if (priceTier === "special") {
+        score += 4;
+        reasons.push("This is still a strong special-occasion bottle.");
+      } else {
+        score -= 10;
+        reasons.push("It is more everyday than splurge-tier.");
+      }
+    }
+  } else if (
+    requestedBudget.priceTier === "everyday" &&
+    requestedBudget.source === "mood" &&
+    record.estimatedPriceUsd !== undefined
+  ) {
+    reasons.push("Budget preference was inferred from the casual mood.");
+  }
+
   const urgency = getDrinkWindowUrgency(record);
   if (urgency === "past_due") {
     score += 18;
@@ -213,6 +324,8 @@ function scoreWineCandidate(
     displayName: getInventoryDisplayName(record),
     score,
     urgency,
+    estimatedPriceUsd: record.estimatedPriceUsd,
+    priceTier,
     reasons
   };
 }
