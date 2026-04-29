@@ -254,6 +254,7 @@ export function buildChatGptActionOpenApiSpec(serverUrl: string) {
           summary: "Search BartenderGPT inventory.",
           description:
             "Search current wine and liquor inventory by category, status, or location.",
+          security: [],
           parameters: [
             {
               name: "category",
@@ -307,6 +308,7 @@ export function buildChatGptActionOpenApiSpec(serverUrl: string) {
           summary: "List wines nearing the end of their drink window.",
           description:
             "Return wine bottles that should be prioritized for drinking soon.",
+          security: [],
           responses: {
             "200": {
               description: "Drink now results."
@@ -361,6 +363,7 @@ export function buildChatGptActionOpenApiSpec(serverUrl: string) {
           description:
             "Recommend in-stock wines using the meal, mood, and weather context.",
           "x-openai-isConsequential": false,
+          security: [],
           requestBody: {
             required: true,
             content: {
@@ -402,6 +405,7 @@ export function buildChatGptActionOpenApiSpec(serverUrl: string) {
           description:
             "Recommend cocktails based on liquor inventory, mood, weather, and base spirit preference.",
           "x-openai-isConsequential": false,
+          security: [],
           requestBody: {
             required: true,
             content: {

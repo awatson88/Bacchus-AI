@@ -7,6 +7,24 @@ const publicRoutes = new Set([
   "/api/v1/chatgpt/instructions.txt"
 ]);
 
+function isPublicReadOnlyApiRoute(request: FastifyRequest, path: string): boolean {
+  if (request.method === "GET") {
+    return (
+      path === "/api/v1/inventory/items" ||
+      path === "/api/v1/inventory/drink-now"
+    );
+  }
+
+  if (request.method === "POST") {
+    return (
+      path === "/api/v1/recommendations/wine" ||
+      path === "/api/v1/recommendations/cocktails"
+    );
+  }
+
+  return false;
+}
+
 function getRequestPath(request: FastifyRequest): string {
   return request.url.split("?")[0] ?? request.url;
 }
@@ -14,6 +32,10 @@ function getRequestPath(request: FastifyRequest): string {
 export function shouldRequireApiAuth(request: FastifyRequest): boolean {
   const path = getRequestPath(request);
   if (publicRoutes.has(path)) {
+    return false;
+  }
+
+  if (isPublicReadOnlyApiRoute(request, path)) {
     return false;
   }
 
