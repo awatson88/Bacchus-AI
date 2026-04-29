@@ -2,6 +2,9 @@ import type { FastifyRequest } from "fastify";
 
 const publicRoutes = new Set([
   "/health",
+  "/mobile",
+  "/mobile/",
+  "/mobile/manifest.webmanifest",
   "/api/v1/chatgpt/openapi.json",
   "/api/v1/chatgpt/instructions",
   "/api/v1/chatgpt/instructions.txt"

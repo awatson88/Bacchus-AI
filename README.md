@@ -31,6 +31,13 @@ Optional image extraction configuration:
 - set `OPENAI_API_KEY` to enable OpenAI-powered bottle extraction from image URLs
 - override `OPENAI_VISION_MODEL` if you want to swap the default multimodal model
 
+Phone-first mobile web app:
+
+- Open `http://localhost:3000/mobile` on your phone browser after starting the API
+- save your `BARTENDERGPT_API_TOKEN` once on that device to enable intake and approval actions
+- use the phone camera/file picker to upload bottle photos directly into the intake queue
+- read-only wine pairing, cocktail suggestions, and inventory search work without the token, but writes still require it
+
 Custom GPT / ChatGPT Actions setup:
 
 - OpenAPI schema: `http://localhost:3000/api/v1/chatgpt/openapi.json`
@@ -52,5 +59,6 @@ This first scaffold includes:
 - multi-bottle intake candidates with per-bottle approve or reject decisions
 - OpenAI Responses API wiring for image-based extraction when `OPENAI_API_KEY` is set, with text heuristics as a fallback
 - ChatGPT Action-friendly intake endpoints and a served OpenAPI schema for uploaded screenshot flows
+- a lightweight mobile web app at `/mobile` for direct phone uploads, candidate review, and quick recommendation queries
 
 The next implementation step is improving image upload/storage and then mapping CellarTracker exports more completely into the SQLite model.

@@ -7,6 +7,7 @@ import { chatGptRoutes } from "./routes/chatgpt.js";
 import { healthRoutes } from "./routes/health.js";
 import { importRoutes } from "./routes/imports.js";
 import { intakeRoutes } from "./routes/intake.js";
+import { mobileRoutes } from "./routes/mobile.js";
 import { inventoryRoutes } from "./routes/inventory.js";
 import { recommendationRoutes } from "./routes/recommendations.js";
 
@@ -41,6 +42,7 @@ export function buildApp(context: BartenderGptAppContext) {
 
   app.register(chatGptRoutes(context), { prefix: "/api/v1/chatgpt" });
   app.register(healthRoutes(context), { prefix: "/health" });
+  app.register(mobileRoutes());
   app.register(inventoryRoutes(context), { prefix: "/api/v1/inventory" });
   app.register(intakeRoutes(context), { prefix: "/api/v1/intake" });
   app.register(importRoutes(context), { prefix: "/api/v1/imports" });
