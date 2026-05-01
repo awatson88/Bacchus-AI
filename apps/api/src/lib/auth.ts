@@ -14,7 +14,9 @@ function isPublicReadOnlyApiRoute(request: FastifyRequest, path: string): boolea
   if (request.method === "GET") {
     return (
       path === "/api/v1/inventory/items" ||
-      path === "/api/v1/inventory/drink-now"
+      path === "/api/v1/inventory/drink-now" ||
+      /^\/api\/v1\/inventory\/items\/[^/]+$/.test(path) ||
+      /^\/api\/v1\/inventory\/items\/[^/]+\/events$/.test(path)
     );
   }
 

@@ -47,6 +47,43 @@ export const cocktailRecommendationSchema = z.object({
   score: z.number(),
   matchedIngredients: z.array(z.string()),
   missingIngredients: z.array(z.string()),
+  recipeIngredients: z.array(z.string()),
+  recipeSteps: z.array(z.string()),
+  servingNotes: z.array(z.string()),
+  matchedInventory: z.array(
+    z.object({
+      ingredient: z.string(),
+      matchedItems: z.array(
+        z.object({
+          itemId: z.string(),
+          displayName: z.string(),
+          category: z.string(),
+          baseSpirit: z.string().optional(),
+          estimatedPriceUsd: z.number().positive().optional(),
+          priceTier: winePriceTierSchema.optional(),
+          imageUrl: z.string().url().optional()
+        })
+      ),
+      assumedPantry: z.boolean().default(false)
+    })
+  ),
+  riffOptions: z.array(
+    z.object({
+      title: z.string(),
+      description: z.string(),
+      items: z.array(
+        z.object({
+          itemId: z.string(),
+          displayName: z.string(),
+          category: z.string(),
+          baseSpirit: z.string().optional(),
+          estimatedPriceUsd: z.number().positive().optional(),
+          priceTier: winePriceTierSchema.optional(),
+          imageUrl: z.string().url().optional()
+        })
+      )
+    })
+  ),
   reasons: z.array(z.string())
 });
 
@@ -63,6 +100,9 @@ type RecipeDefinition = {
   name: string;
   ingredients: string[];
   tags: string[];
+  steps: string[];
+  servingNotes: string[];
+  riffTargets?: string[];
 };
 
 const wineInputSchema = z.array(inventoryRecordSchema);
@@ -72,32 +112,71 @@ const starterCocktails: RecipeDefinition[] = [
   {
     name: "Negroni",
     ingredients: ["gin", "sweet vermouth", "campari"],
-    tags: ["stirred", "aperitivo", "balanced"]
+    tags: ["stirred", "aperitivo", "balanced"],
+    steps: [
+      "Add gin, sweet vermouth, and Campari to a mixing glass with ice.",
+      "Stir until properly chilled and lightly diluted.",
+      "Strain over a large cube in a rocks glass and garnish with an orange peel."
+    ],
+    servingNotes: ["Classic equal-parts build.", "Excellent before dinner."]
   },
   {
     name: "Old Fashioned",
     ingredients: ["bourbon", "bitters", "sugar", "orange peel"],
-    tags: ["stirred", "boozy", "cold-weather"]
+    tags: ["stirred", "boozy", "cold-weather"],
+    steps: [
+      "Stir bourbon, bitters, and sugar with ice until integrated.",
+      "Strain over fresh ice in a rocks glass.",
+      "Express an orange peel over the drink and use it as garnish."
+    ],
+    servingNotes: ["Works beautifully with richer, higher-proof whiskey."],
+    riffTargets: ["rye"]
   },
   {
     name: "Daiquiri",
     ingredients: ["rum", "lime", "simple syrup"],
-    tags: ["refreshing", "warm-weather", "classic"]
+    tags: ["refreshing", "warm-weather", "classic"],
+    steps: [
+      "Shake rum, lime, and simple syrup hard with ice.",
+      "Double strain into a chilled coupe.",
+      "Serve up with no garnish or a thin lime wheel."
+    ],
+    servingNotes: ["Best when the lime is very fresh."]
   },
   {
     name: "Margarita",
     ingredients: ["tequila", "orange liqueur", "lime"],
-    tags: ["citrusy", "party", "warm-weather"]
+    tags: ["citrusy", "party", "warm-weather"],
+    steps: [
+      "Shake tequila, orange liqueur, and lime with ice.",
+      "Strain over fresh ice into a rocks glass or serve up.",
+      "Optional: salt half the rim if that suits the mood."
+    ],
+    servingNotes: ["A brighter orange liqueur keeps it crisp."],
+    riffTargets: ["mezcal"]
   },
   {
     name: "Manhattan",
     ingredients: ["rye", "sweet vermouth", "bitters"],
-    tags: ["stirred", "nightcap", "classic"]
+    tags: ["stirred", "nightcap", "classic"],
+    steps: [
+      "Stir rye, sweet vermouth, and bitters with ice until chilled.",
+      "Strain into a coupe or Nick and Nora glass.",
+      "Garnish with a cherry or expressed orange peel."
+    ],
+    servingNotes: ["Lean rye for spice, or riff with bourbon for a rounder build."],
+    riffTargets: ["bourbon"]
   },
   {
     name: "Jungle Bird",
     ingredients: ["rum", "campari", "pineapple juice", "lime", "simple syrup"],
-    tags: ["tiki", "warm-weather", "playful"]
+    tags: ["tiki", "warm-weather", "playful"],
+    steps: [
+      "Shake rum, Campari, pineapple juice, lime, and simple syrup with ice.",
+      "Dump or strain into a short glass over crushed or pebble ice.",
+      "Garnish with pineapple fronds or a lime wheel if you have one."
+    ],
+    servingNotes: ["A funkier rum makes this more playful."]
   }
 ];
 
@@ -135,6 +214,25 @@ function getInventoryDescriptor(record: InventoryRecord): string {
       record.cocktailTags.join(" ")
     ].join(" ")
   );
+}
+
+function toInventoryOption(record: InventoryRecord) {
+  return {
+    itemId: record.id,
+    displayName: getInventoryDisplayName(record),
+    category: record.category,
+    baseSpirit: record.baseSpirit,
+    estimatedPriceUsd: record.estimatedPriceUsd,
+    priceTier: getEffectiveWinePriceTier(record),
+    imageUrl: record.imageUrl
+  };
+}
+
+function getMatchingInventoryItems(
+  inventory: InventoryRecord[],
+  ingredient: string
+): InventoryRecord[] {
+  return inventory.filter((record) => inventoryMatchesIngredient(record, ingredient));
 }
 
 function inferBudgetPreference(request: WinePairingRequest): {
@@ -375,17 +473,29 @@ function getRecipeScore(
   const preferredBaseSpirit = normalize(request.preferredBaseSpirit);
   const matchedIngredients: string[] = [];
   const missingIngredients: string[] = [];
+  const matchedInventory: CocktailRecommendation["matchedInventory"] = [];
   const reasons: string[] = [];
   let score = 60;
 
   for (const ingredient of recipe.ingredients) {
-    if (inventory.some((record) => inventoryMatchesIngredient(record, ingredient))) {
+    const matchedItems = getMatchingInventoryItems(inventory, ingredient);
+    if (matchedItems.length > 0) {
       matchedIngredients.push(ingredient);
+      matchedInventory.push({
+        ingredient,
+        matchedItems: matchedItems.map(toInventoryOption),
+        assumedPantry: false
+      });
       continue;
     }
 
     if (assumedPantry.has(normalize(ingredient))) {
       matchedIngredients.push(ingredient);
+      matchedInventory.push({
+        ingredient,
+        matchedItems: [],
+        assumedPantry: true
+      });
       reasons.push(`Assuming pantry staple: ${ingredient}.`);
       score -= 2;
       continue;
@@ -430,11 +540,24 @@ function getRecipeScore(
     reasons.push("You have everything needed on hand.");
   }
 
+  const riffOptions = (recipe.riffTargets ?? [])
+    .map((target) => ({
+      title: `${target[0]?.toUpperCase() ?? ""}${target.slice(1)} riff`,
+      description: `If you want to riff on the ${recipe.name}, these ${target} options are on hand.`,
+      items: getMatchingInventoryItems(inventory, target).map(toInventoryOption)
+    }))
+    .filter((riff) => riff.items.length > 0);
+
   return {
     name: recipe.name,
     score,
     matchedIngredients,
     missingIngredients,
+    recipeIngredients: recipe.ingredients,
+    recipeSteps: recipe.steps,
+    servingNotes: recipe.servingNotes,
+    matchedInventory,
+    riffOptions,
     reasons
   };
 }

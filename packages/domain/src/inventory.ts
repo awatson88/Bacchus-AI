@@ -75,7 +75,10 @@ export const inventoryRecordSchema = z.object({
   confidence: z.number().min(0).max(1).optional(),
   pairingTags: z.array(z.string()).default([]),
   cocktailTags: z.array(z.string()).default([]),
-  notes: z.string().optional()
+  notes: z.string().optional(),
+  imageUrl: z.string().url().optional(),
+  createdAt: z.string().datetime().optional(),
+  updatedAt: z.string().datetime().optional()
 });
 
 export const inventoryQuerySchema = z.object({
@@ -146,7 +149,8 @@ export const createInventoryItemRequestSchema = z.object({
   confidence: z.number().min(0).max(1).optional(),
   pairingTags: z.array(z.string()).default([]),
   cocktailTags: z.array(z.string()).default([]),
-  notes: z.string().optional()
+  notes: z.string().optional(),
+  imageUrl: z.string().url().optional()
 });
 
 export const updateInventoryItemRequestSchema = z.object({
@@ -173,6 +177,7 @@ export const updateInventoryItemRequestSchema = z.object({
   pairingTags: z.array(z.string()).optional(),
   cocktailTags: z.array(z.string()).optional(),
   notes: z.string().optional(),
+  imageUrl: z.string().url().optional(),
   eventType: inventoryEventTypeSchema.optional(),
   quantityDelta: z.number().optional()
 });
@@ -219,7 +224,8 @@ export const intakeCandidateSchema = z.object({
   quantity: z.number().int().positive().default(1),
   confidence: z.number().min(0).max(1),
   notes: z.string().optional(),
-  reasoning: z.array(z.string()).default([])
+  reasoning: z.array(z.string()).default([]),
+  imageUrl: z.string().url().optional()
 });
 
 export const intakeJobSchema = z.object({

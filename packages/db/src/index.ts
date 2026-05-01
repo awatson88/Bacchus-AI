@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS inventory_items (
   pairing_tags TEXT NOT NULL DEFAULT '[]',
   cocktail_tags TEXT NOT NULL DEFAULT '[]',
   notes TEXT,
+  image_url TEXT,
   source_system TEXT NOT NULL DEFAULT 'manual',
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -134,6 +135,7 @@ export function initializeDatabase(
   );
   ensureColumn(database, "inventory_items", "estimated_price_usd", "REAL");
   ensureColumn(database, "inventory_items", "price_tier", "TEXT");
+  ensureColumn(database, "inventory_items", "image_url", "TEXT");
 }
 
 function ensureColumn(

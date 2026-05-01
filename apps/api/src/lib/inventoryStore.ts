@@ -99,6 +99,9 @@ type InventoryItemRow = {
   pairing_tags: string;
   cocktail_tags: string;
   notes: string | null;
+  image_url: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 type InventoryEventRow = {
@@ -192,7 +195,10 @@ function mapRowToInventoryRecord(row: InventoryItemRow): InventoryRecord {
     confidence: row.confidence ?? undefined,
     pairingTags: parseJsonArray(row.pairing_tags),
     cocktailTags: parseJsonArray(row.cocktail_tags),
-    notes: row.notes ?? undefined
+    notes: row.notes ?? undefined,
+    imageUrl: row.image_url ?? undefined,
+    createdAt: new Date(row.created_at).toISOString(),
+    updatedAt: new Date(row.updated_at).toISOString()
   };
 }
 
@@ -233,7 +239,8 @@ function mapInventoryRecordToDatabaseParams(item: InventoryRecord) {
     confidence: item.confidence ?? null,
     pairing_tags: JSON.stringify(item.pairingTags),
     cocktail_tags: JSON.stringify(item.cocktailTags),
-    notes: item.notes ?? null
+    notes: item.notes ?? null,
+    image_url: item.imageUrl ?? null
   };
 }
 
@@ -262,7 +269,8 @@ function mapInventoryRecordToUpdateParams(item: InventoryRecord) {
     confidence: item.confidence ?? null,
     pairing_tags: JSON.stringify(item.pairingTags),
     cocktail_tags: JSON.stringify(item.cocktailTags),
-    notes: item.notes ?? null
+    notes: item.notes ?? null,
+    image_url: item.imageUrl ?? null
   };
 }
 
@@ -344,6 +352,7 @@ function normalizeIntakeCandidate(
     priceTier: candidate.priceTier,
     location: candidate.location,
     bin: candidate.bin,
+    imageUrl: candidate.imageUrl,
     quantity:
       typeof candidate.quantity === "number" && candidate.quantity > 0
         ? candidate.quantity
@@ -718,6 +727,7 @@ class InMemoryInventoryStore implements InventoryStore {
       pendingRequest.candidate.bin = pendingRequest.request.bin;
       pendingRequest.candidate.quantity = pendingRequest.request.quantity;
       pendingRequest.candidate.notes = pendingRequest.request.notes;
+      pendingRequest.candidate.imageUrl = pendingRequest.request.imageUrl;
       pendingRequest.candidate.confidence =
         pendingRequest.request.confidence ??
         pendingRequest.candidate.confidence ??
@@ -760,7 +770,7 @@ class SqliteInventoryStore implements InventoryStore {
         grape_varieties, base_spirit, size_ml, abv, location, bin, status,
         fill_percent, drink_from, drink_to, quality_score, estimated_price_usd,
         price_tier, confidence,
-        pairing_tags, cocktail_tags, notes
+        pairing_tags, cocktail_tags, notes, image_url, created_at, updated_at
       FROM inventory_items
       ORDER BY created_at DESC
     `);
@@ -770,7 +780,7 @@ class SqliteInventoryStore implements InventoryStore {
         grape_varieties, base_spirit, size_ml, abv, location, bin, status,
         fill_percent, drink_from, drink_to, quality_score, estimated_price_usd,
         price_tier, confidence,
-        pairing_tags, cocktail_tags, notes
+        pairing_tags, cocktail_tags, notes, image_url, created_at, updated_at
       FROM inventory_items
       WHERE
         (@category IS NULL OR category = @category) AND
@@ -785,7 +795,7 @@ class SqliteInventoryStore implements InventoryStore {
         grape_varieties, base_spirit, size_ml, abv, location, bin, status,
         fill_percent, drink_from, drink_to, quality_score, estimated_price_usd,
         price_tier, confidence,
-        pairing_tags, cocktail_tags, notes
+        pairing_tags, cocktail_tags, notes, image_url, created_at, updated_at
       FROM inventory_items
       WHERE id = ?
       LIMIT 1
@@ -797,13 +807,13 @@ class SqliteInventoryStore implements InventoryStore {
         grape_varieties, base_spirit, size_ml, abv, location, bin, status,
         fill_percent, drink_from, drink_to, quality_score, estimated_price_usd,
         price_tier, confidence,
-        pairing_tags, cocktail_tags, notes, source_system, updated_at
+        pairing_tags, cocktail_tags, notes, image_url, source_system, updated_at
       ) VALUES (
         @id, @category, @producer, @label, @vintage, @country, @region, @style,
         @grape_varieties, @base_spirit, @size_ml, @abv, @location, @bin, @status,
         @fill_percent, @drink_from, @drink_to, @quality_score, @estimated_price_usd,
         @price_tier, @confidence,
-        @pairing_tags, @cocktail_tags, @notes, @source_system, datetime('now')
+        @pairing_tags, @cocktail_tags, @notes, @image_url, @source_system, datetime('now')
       )
     `);
 
@@ -833,6 +843,7 @@ class SqliteInventoryStore implements InventoryStore {
         pairing_tags = @pairing_tags,
         cocktail_tags = @cocktail_tags,
         notes = @notes,
+        image_url = @image_url,
         updated_at = datetime('now')
       WHERE id = @id
     `);
@@ -1322,7 +1333,7 @@ class SqliteInventoryStore implements InventoryStore {
         grape_varieties, base_spirit, size_ml, abv, location, bin, status,
         fill_percent, drink_from, drink_to, quality_score, estimated_price_usd,
         price_tier, confidence,
-        pairing_tags, cocktail_tags, notes
+        pairing_tags, cocktail_tags, notes, image_url, created_at, updated_at
       FROM inventory_items
       ORDER BY created_at DESC, rowid DESC
       LIMIT ?
@@ -1417,7 +1428,11 @@ function buildCreateRequestFromCandidate(
     confidence: overrides?.confidence ?? candidate?.confidence,
     pairingTags: overrides?.pairingTags ?? [],
     cocktailTags: overrides?.cocktailTags ?? [],
-    notes: overrides?.notes ?? candidate?.notes
+    notes: overrides?.notes ?? candidate?.notes,
+    imageUrl:
+      overrides?.imageUrl ??
+      candidate?.imageUrl ??
+      job.images[0]?.url
   };
 
   const parsed = createInventoryItemRequestSchema.safeParse(merged);
