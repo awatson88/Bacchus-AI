@@ -78,5 +78,44 @@ export const bartenderGptToolCatalog: BartenderGptToolDefinition[] = [
     name: "get_drink_now_candidates",
     description: "List wines approaching or passing the end of their drink window.",
     inputExample: {}
+  },
+  {
+    name: "log_workout",
+    description: "Save a completed workout with structured movements, duration, score, notes, and uploaded workout image references.",
+    inputExample: {
+      workoutType: "emom",
+      summary: "12 minute EMOM alternating 8 burpees and 12 calories row.",
+      durationSeconds: 720,
+      movements: [
+        {
+          name: "burpee",
+          reps: 48,
+          category: "conditioning",
+          bodyRegions: ["full body"]
+        },
+        {
+          name: "row",
+          calories: 72,
+          equipment: "rower",
+          category: "monostructural"
+        }
+      ]
+    }
+  },
+  {
+    name: "search_workouts",
+    description: "Search workout history by movement, workout type, date range, or text.",
+    inputExample: {
+      movement: "back squat",
+      limit: 10
+    }
+  },
+  {
+    name: "find_similar_workouts",
+    description: "Find workouts similar to a workout ID or natural-language workout description.",
+    inputExample: {
+      query: "15 down to 10 burpees and calories row",
+      movement: "burpee"
+    }
   }
 ];

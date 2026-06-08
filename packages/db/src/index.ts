@@ -100,6 +100,72 @@ CREATE TABLE IF NOT EXISTS intake_images (
 
 CREATE INDEX IF NOT EXISTS idx_intake_images_job
   ON intake_images (intake_job_id);
+
+CREATE TABLE IF NOT EXISTS workouts (
+  id TEXT PRIMARY KEY,
+  performed_at TEXT NOT NULL,
+  title TEXT,
+  workout_type TEXT NOT NULL,
+  summary TEXT NOT NULL,
+  raw_text TEXT,
+  duration_seconds INTEGER,
+  score_type TEXT NOT NULL DEFAULT 'none',
+  score_value REAL,
+  score_unit TEXT,
+  notes TEXT,
+  source_system TEXT NOT NULL DEFAULT 'manual',
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_workouts_performed_type
+  ON workouts (performed_at, workout_type);
+
+CREATE TABLE IF NOT EXISTS workout_movements (
+  id TEXT PRIMARY KEY,
+  workout_id TEXT NOT NULL,
+  movement_name TEXT NOT NULL,
+  movement_slug TEXT NOT NULL,
+  category TEXT,
+  equipment TEXT,
+  body_regions_json TEXT NOT NULL DEFAULT '[]',
+  load_value REAL,
+  load_unit TEXT,
+  reps INTEGER,
+  distance_value REAL,
+  distance_unit TEXT,
+  calories REAL,
+  duration_seconds INTEGER,
+  order_index INTEGER NOT NULL DEFAULT 0,
+  FOREIGN KEY (workout_id) REFERENCES workouts(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_workout_movements_slug
+  ON workout_movements (movement_slug, workout_id);
+
+CREATE TABLE IF NOT EXISTS workout_images (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  workout_id TEXT NOT NULL,
+  filename TEXT NOT NULL,
+  content_type TEXT NOT NULL,
+  url TEXT,
+  storage_key TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (workout_id) REFERENCES workouts(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_workout_images_workout
+  ON workout_images (workout_id);
+
+CREATE TABLE IF NOT EXISTS workout_embeddings (
+  workout_id TEXT NOT NULL,
+  model TEXT NOT NULL,
+  searchable_text TEXT NOT NULL,
+  embedding_json TEXT,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (workout_id, model),
+  FOREIGN KEY (workout_id) REFERENCES workouts(id) ON DELETE CASCADE
+);
 `;
 
 export function resolveDatabasePath(

@@ -2,8 +2,11 @@ import type { FastifyInstance } from "fastify";
 import {
   approveIntakeJobRequestSchema,
   createChatGptIntakeJobRequestSchema,
+  createWorkoutRequestSchema,
   getInventoryDisplayName,
   reviewChatGptIntakeCandidateRequestSchema,
+  similarWorkoutQuerySchema,
+  workoutQuerySchema,
   type IntakeCandidate,
   type IntakeJob,
   type OpenAiFileReferenceInput
@@ -262,6 +265,49 @@ export function chatGptRoutes(context: BartenderGptAppContext) {
           location: item.location,
           status: item.status
         }))
+      };
+    });
+
+    app.post("/workouts", async (request, reply) => {
+      const rawPayload = request.body as Record<string, unknown>;
+      const fileRefs = normalizeOpenAiFileReferences(
+        Array.isArray(rawPayload.openaiFileIdRefs)
+          ? (rawPayload.openaiFileIdRefs as OpenAiFileReferenceInput[])
+          : []
+      );
+      const payload = createWorkoutRequestSchema.parse({
+        ...rawPayload,
+        sourceSystem: "chatgpt",
+        images: [
+          ...(Array.isArray(rawPayload.images) ? rawPayload.images : []),
+          ...fileRefs.map((fileRef) => ({
+            filename: fileRef.name,
+            contentType: fileRef.mime_type,
+            url: fileRef.download_link
+          }))
+        ]
+      });
+      const workout = await context.workoutStore.create(payload);
+
+      return reply.code(201).send({ workout });
+    });
+
+    app.get("/workouts/search", async (request) => {
+      const workouts = await context.workoutStore.list(
+        workoutQuerySchema.parse(request.query)
+      );
+      return {
+        count: workouts.length,
+        workouts
+      };
+    });
+
+    app.get("/workouts/similar", async (request) => {
+      const query = similarWorkoutQuerySchema.parse(request.query);
+      const results = await context.workoutStore.findSimilar(query);
+      return {
+        count: results.length,
+        results
       };
     });
   };

@@ -24,6 +24,7 @@ export const wineRecommendationSchema = z.object({
   urgency: z.enum(["past_due", "drink_now", "hold", "unknown"]),
   estimatedPriceUsd: z.number().positive().optional(),
   priceTier: winePriceTierSchema.optional(),
+  imageUrl: z.string().url().optional(),
   reasons: z.array(z.string())
 });
 
@@ -177,6 +178,51 @@ const starterCocktails: RecipeDefinition[] = [
       "Garnish with pineapple fronds or a lime wheel if you have one."
     ],
     servingNotes: ["A funkier rum makes this more playful."]
+  },
+  {
+    name: "Mai Tai",
+    ingredients: ["rum", "orange liqueur", "lime", "orgeat"],
+    tags: ["tiki", "warm-weather", "vacation"],
+    steps: [
+      "Shake rum, orange liqueur, lime, and orgeat hard with ice.",
+      "Strain over crushed ice into a double rocks glass.",
+      "Garnish with spent lime shell and a mint bouquet if you have them."
+    ],
+    servingNotes: ["Orgeat is the ingredient that makes this sing."],
+    riffTargets: ["jamaican rum", "dark rum"]
+  },
+  {
+    name: "Army & Navy",
+    ingredients: ["gin", "lemon", "orgeat"],
+    tags: ["refreshing", "warm-weather", "classic"],
+    steps: [
+      "Shake gin, lemon, and orgeat with ice until cold.",
+      "Double strain into a chilled coupe.",
+      "Finish with a lemon twist if one is around."
+    ],
+    servingNotes: ["A great way to put orgeat to work outside tiki drinks."]
+  },
+  {
+    name: "El Presidente",
+    ingredients: ["rum", "dry vermouth", "orange liqueur", "grenadine"],
+    tags: ["stirred", "elegant", "classic"],
+    steps: [
+      "Stir rum, dry vermouth, orange liqueur, and grenadine with ice.",
+      "Strain into a chilled coupe.",
+      "Garnish with an orange twist."
+    ],
+    servingNotes: ["Use grenadine sparingly so the drink stays crisp."]
+  },
+  {
+    name: "Planter's Punch",
+    ingredients: ["rum", "lime", "grenadine", "bitters"],
+    tags: ["tiki", "warm-weather", "party"],
+    steps: [
+      "Shake rum, lime, grenadine, and bitters with ice.",
+      "Strain over fresh ice in a tall glass.",
+      "Top with a little crushed ice and garnish with mint if available."
+    ],
+    servingNotes: ["A fuller-bodied rum gives this more depth."]
   }
 ];
 
@@ -424,6 +470,7 @@ function scoreWineCandidate(
     urgency,
     estimatedPriceUsd: record.estimatedPriceUsd,
     priceTier,
+    imageUrl: record.imageUrl,
     reasons
   };
 }
@@ -449,6 +496,10 @@ function inventoryMatchesIngredient(record: InventoryRecord, ingredient: string)
 
   if (target === "sweet vermouth") {
     return includesAny(descriptor, ["sweet vermouth", "carpano", "vermouth rosso"]);
+  }
+
+  if (target === "dry vermouth") {
+    return includesAny(descriptor, ["dry vermouth", "blanc vermouth", "vermouth dry"]);
   }
 
   if (target === "campari") {

@@ -316,13 +316,66 @@ button:disabled {
 }
 
 .fallback-thumbnail {
-  display: grid;
-  place-items: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 8px 7px 7px;
   color: #4f3b2b;
-  font-weight: 800;
-  font-size: 18px;
-  letter-spacing: 0.04em;
+}
+
+.fallback-thumbnail::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 10px;
+  height: 10px;
+  border-radius: 999px 999px 6px 6px;
+  background: rgba(79, 59, 43, 0.14);
+}
+
+.fallback-icon {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  margin-top: 12px;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.fallback-label {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 3px;
+  padding: 6px 7px 7px;
+  border-radius: 10px;
+  background: rgba(255, 250, 244, 0.82);
+  border: 1px solid rgba(85, 58, 36, 0.08);
+}
+
+.fallback-category {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: rgba(79, 59, 43, 0.72);
+}
+
+.fallback-name {
+  font-size: 9px;
+  line-height: 1.1;
+  font-weight: 700;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.fallback-vintage {
+  font-size: 8px;
+  color: rgba(79, 59, 43, 0.7);
 }
 
 .card-detail {
@@ -476,6 +529,122 @@ button:disabled {
   gap: 10px;
 }
 
+.panel-wide {
+  grid-column: 1 / -1;
+}
+
+.concierge-panel {
+  background:
+    linear-gradient(135deg, rgba(255, 252, 247, 0.98) 0%, rgba(255, 247, 238, 0.95) 100%);
+}
+
+.context-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin: 10px 0 14px;
+}
+
+.context-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(85, 58, 36, 0.08);
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.context-action {
+  padding: 10px 14px;
+}
+
+.prompt-shell {
+  display: grid;
+  gap: 12px;
+}
+
+.prompt-input {
+  min-height: 84px;
+  border-radius: 22px;
+  padding: 16px 18px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.prompt-submit {
+  justify-self: flex-start;
+}
+
+.prompt-templates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.prompt-chip {
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.prompt-chip:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.pantry-preset-grid {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.pantry-preset-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 13px;
+  border-radius: var(--radius-md);
+  background: var(--panel-soft);
+  border: 1px solid rgba(85, 58, 36, 0.1);
+}
+
+.pantry-preset-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(162, 58, 44, 0.1);
+  font-size: 18px;
+}
+
+.pantry-preset-copy strong {
+  display: block;
+  font-size: 14px;
+}
+
+.pantry-preset-copy span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.pantry-mini-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.pantry-mini-actions button {
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
 @media (min-width: 760px) {
   body { padding: 26px 20px 34px; }
   .section-grid { grid-template-columns: 1.1fr 0.9fr; align-items: start; }
@@ -492,23 +661,92 @@ const state = {
   selectedItemEvents: [],
   inventoryItems: [],
   lastInventoryCategory: "",
-  expandedCocktail: null
+  expandedCocktail: null,
+  weatherContext: null,
+  pantryItems: []
 };
+
+const pantryPresets = [
+  {
+    id: "orgeat",
+    category: "syrup",
+    producer: "House",
+    label: "Orgeat",
+    location: "Bar Pantry",
+    cocktailTags: ["orgeat", "almond"]
+  },
+  {
+    id: "gum-syrup",
+    category: "syrup",
+    producer: "House",
+    label: "Gum Syrup",
+    location: "Bar Pantry",
+    cocktailTags: ["gum syrup", "rich syrup"]
+  },
+  {
+    id: "grenadine",
+    category: "syrup",
+    producer: "House",
+    label: "Homemade Grenadine",
+    location: "Bar Pantry",
+    cocktailTags: ["grenadine", "pomegranate"]
+  },
+  {
+    id: "angostura",
+    category: "bitters",
+    producer: "Angostura",
+    label: "Aromatic Bitters",
+    location: "Bar Pantry",
+    cocktailTags: ["bitters", "aromatic"]
+  },
+  {
+    id: "orange-bitters",
+    category: "bitters",
+    producer: "Regans",
+    label: "Orange Bitters No. 6",
+    location: "Bar Pantry",
+    cocktailTags: ["orange bitters", "bitters"]
+  },
+  {
+    id: "luxardo",
+    category: "mixer",
+    producer: "Luxardo",
+    label: "Maraschino Cherries",
+    location: "Bar Pantry",
+    cocktailTags: ["cherry", "garnish"]
+  },
+  {
+    id: "pineapple-juice",
+    category: "mixer",
+    producer: "House",
+    label: "Pineapple Juice",
+    location: "Fridge",
+    cocktailTags: ["pineapple juice"]
+  }
+];
 
 const tokenInput = document.querySelector("#token");
 const tokenStatus = document.querySelector("#token-status");
 const intakeStatus = document.querySelector("#intake-status");
+const conciergeStatus = document.querySelector("#concierge-status");
 const recommendationsStatus = document.querySelector("#recommendations-status");
 const inventoryStatus = document.querySelector("#inventory-status");
+const pantryStatus = document.querySelector("#pantry-status");
 const candidatesRoot = document.querySelector("#candidates");
 const recommendationsRoot = document.querySelector("#recommendations");
 const inventoryRoot = document.querySelector("#inventory-results");
+const pantryRoot = document.querySelector("#pantry-results");
 const sheetBackdrop = document.querySelector("#sheet-backdrop");
 const detailSheet = document.querySelector("#detail-sheet");
 const detailSheetBody = document.querySelector("#detail-sheet-body");
+const ambientContextChip = document.querySelector("#ambient-context-chip");
+const conciergePrompt = document.querySelector("#concierge-prompt");
 
 tokenInput.value = state.token;
 updateTokenStatus();
+renderPantryPresets();
+refreshAmbientContext();
+loadPantry(true);
 
 document.querySelector("#save-token").addEventListener("click", () => {
   state.token = tokenInput.value.trim();
@@ -525,6 +763,22 @@ document.querySelector("#clear-token").addEventListener("click", () => {
   tokenInput.value = "";
   localStorage.removeItem("bartendergpt_api_token");
   updateTokenStatus("Cleared.");
+});
+
+document.querySelector("#concierge-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  await runConciergePrompt();
+});
+
+document.querySelector("#refresh-ambient").addEventListener("click", async () => {
+  await refreshAmbientContext(true);
+});
+
+document.querySelectorAll("[data-prompt-template]").forEach((button) => {
+  button.addEventListener("click", () => {
+    conciergePrompt.value = button.getAttribute("data-prompt-template") || "";
+    conciergePrompt.focus();
+  });
 });
 
 document.querySelector("#sheet-close").addEventListener("click", closeItemDetail);
@@ -651,6 +905,10 @@ document.querySelector("#load-inventory").addEventListener("click", async () => 
   await loadInventory();
 });
 
+document.querySelector("#load-pantry").addEventListener("click", async () => {
+  await loadPantry();
+});
+
 async function loadInventory() {
   setStatus(inventoryStatus, "Loading inventory…");
   const category = document.querySelector("#inventory-category").value;
@@ -669,6 +927,97 @@ async function loadInventory() {
     setStatus(inventoryStatus, payload.count + " bottles loaded.", "success");
   } catch (error) {
     setStatus(inventoryStatus, error.message || "Unable to load inventory.", "error");
+  }
+}
+
+async function loadPantry(silent = false) {
+  if (!silent) {
+    setStatus(pantryStatus, "Loading tracked pantry…");
+  }
+
+  try {
+    const response = await fetch("/api/v1/inventory/items");
+    if (!response.ok) {
+      throw new Error(await getErrorMessage(response));
+    }
+
+    const payload = await response.json();
+    state.pantryItems = (payload.items || []).filter((item) =>
+      ["bitters", "syrup", "mixer"].includes(item.category) &&
+      !["consumed", "missing", "empty"].includes(item.status)
+    );
+    renderPantryItems(state.pantryItems);
+    renderPantryPresets();
+
+    if (!silent) {
+      setStatus(pantryStatus, state.pantryItems.length + " tracked pantry items loaded.", "success");
+    }
+  } catch (error) {
+    if (!silent) {
+      setStatus(pantryStatus, error.message || "Unable to load pantry items.", "error");
+    }
+  }
+}
+
+async function runConciergePrompt() {
+  const prompt = conciergePrompt.value.trim();
+  if (!prompt) {
+    setStatus(conciergeStatus, "Tell me what you're feeling or what dinner looks like first.", "error");
+    return;
+  }
+
+  setStatus(conciergeStatus, "Thinking through your inventory, mood, and Chicago context…");
+  setStatus(recommendationsStatus, "Working on a bartender's choice…");
+
+  const mode = inferPromptMode(prompt);
+  const weatherSummary = getAmbientSummary();
+
+  try {
+    if (mode === "wine") {
+      const response = await fetch("/api/v1/recommendations/wine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          meal: extractMealFromPrompt(prompt) || prompt,
+          mood: prompt,
+          weatherSummary,
+          budgetPreference: inferBudgetPreferenceFromPrompt(prompt) || undefined
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(await getErrorMessage(response));
+      }
+
+      const payload = await response.json();
+      renderWineRecommendations(payload.recommendations || []);
+      setStatus(conciergeStatus, "Wine picks are ready.", "success");
+      setStatus(recommendationsStatus, "Wine suggestions refreshed.", "success");
+      return;
+    }
+
+    const response = await fetch("/api/v1/recommendations/cocktails", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mood: prompt,
+        weatherSummary,
+        preferredBaseSpirit: inferPreferredSpiritFromPrompt(prompt) || undefined
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(await getErrorMessage(response));
+    }
+
+    const payload = await response.json();
+    renderCocktailRecommendations(payload.recommendations || []);
+    setStatus(conciergeStatus, "Cocktail ideas are ready.", "success");
+    setStatus(recommendationsStatus, "Cocktail suggestions refreshed.", "success");
+  } catch (error) {
+    const message = error.message || "Unable to work up a recommendation right now.";
+    setStatus(conciergeStatus, message, "error");
+    setStatus(recommendationsStatus, message, "error");
   }
 }
 
@@ -723,6 +1072,138 @@ async function getErrorMessage(response) {
   } catch {
     return "Request failed.";
   }
+}
+
+async function refreshAmbientContext(showStatus = false) {
+  if (showStatus) {
+    setStatus(conciergeStatus, "Refreshing Chicago weather and season…");
+  }
+
+  try {
+    const response = await fetch("https://api.open-meteo.com/v1/forecast?latitude=41.8781&longitude=-87.6298&current=temperature_2m,apparent_temperature,weather_code&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FChicago");
+    if (!response.ok) {
+      throw new Error("Could not pull Chicago weather.");
+    }
+
+    const payload = await response.json();
+    state.weatherContext = buildAmbientContext(payload.current);
+  } catch {
+    state.weatherContext = buildFallbackAmbientContext();
+  }
+
+  ambientContextChip.textContent = state.weatherContext.label;
+  if (showStatus) {
+    setStatus(conciergeStatus, "Chicago context refreshed.", "success");
+  }
+}
+
+function buildAmbientContext(current) {
+  const now = new Date();
+  const season = getSeason(now);
+  const weekday = now.toLocaleDateString(undefined, { weekday: "long" });
+  const temperature = typeof current?.temperature_2m === "number" ? Math.round(current.temperature_2m) + "°F" : null;
+  const weatherText = describeWeatherCode(current?.weather_code);
+  const label = "Chicago now: " + [temperature, weatherText, season].filter(Boolean).join(" • ");
+  const summary = ["Chicago", weekday, season, temperature, weatherText].filter(Boolean).join(", ");
+
+  return { label, summary };
+}
+
+function buildFallbackAmbientContext() {
+  const now = new Date();
+  const season = getSeason(now);
+  const weekday = now.toLocaleDateString(undefined, { weekday: "long" });
+  return {
+    label: "Chicago context: " + weekday + " • " + season,
+    summary: ["Chicago", weekday, season].join(", ")
+  };
+}
+
+function getAmbientSummary() {
+  return state.weatherContext?.summary || buildFallbackAmbientContext().summary;
+}
+
+function getSeason(date) {
+  const month = date.getMonth();
+  if ([11, 0, 1].includes(month)) {
+    return "winter";
+  }
+  if ([2, 3, 4].includes(month)) {
+    return "spring";
+  }
+  if ([5, 6, 7].includes(month)) {
+    return "summer";
+  }
+  return "fall";
+}
+
+function describeWeatherCode(code) {
+  const map = {
+    0: "clear",
+    1: "mostly clear",
+    2: "partly cloudy",
+    3: "overcast",
+    45: "foggy",
+    48: "foggy",
+    51: "light drizzle",
+    53: "drizzly",
+    55: "steady drizzle",
+    61: "light rain",
+    63: "rainy",
+    65: "heavy rain",
+    71: "snow showers",
+    73: "snowy",
+    75: "heavy snow",
+    80: "scattered showers",
+    81: "showery",
+    82: "stormy showers",
+    95: "thunderstorms"
+  };
+  return map[code] || "seasonal weather";
+}
+
+function inferPromptMode(prompt) {
+  const normalized = normalize(prompt);
+
+  if (includesAny(normalized, ["wine", "pair", "pairing", "cellar", "barolo", "pinot", "chablis", "champagne"])) {
+    return "wine";
+  }
+
+  if (includesAny(normalized, ["cocktail", "martini", "margarita", "manhattan", "negroni", "daiquiri", "old fashioned", "tiki", "dealer's choice", "caribbean", "rum", "bourbon", "rye", "mezcal", "tequila", "gin"])) {
+    return "cocktail";
+  }
+
+  if (includesAny(normalized, ["dinner", "lunch", "roast", "taco", "pasta", "steak", "chicken", "fish", "salmon"])) {
+    return "wine";
+  }
+
+  return "cocktail";
+}
+
+function extractMealFromPrompt(prompt) {
+  const normalized = prompt.trim();
+  const match = normalized.match(/(?:having|making|eating)\s+(.+?)(?:\.|,| and | but | while | tonight|$)/i);
+  return match?.[1]?.trim() || "";
+}
+
+function inferBudgetPreferenceFromPrompt(prompt) {
+  const normalized = normalize(prompt);
+  if (includesAny(normalized, ["tuesday", "weekday", "weeknight", "casual", "everyday"])) {
+    return "everyday";
+  }
+  if (includesAny(normalized, ["special", "date night", "nice bottle", "celebration"])) {
+    return "special";
+  }
+  if (includesAny(normalized, ["splurge", "trophy bottle", "go big"])) {
+    return "splurge";
+  }
+  return "";
+}
+
+function inferPreferredSpiritFromPrompt(prompt) {
+  const normalized = normalize(prompt);
+  const spirits = ["rum", "tequila", "mezcal", "gin", "bourbon", "rye", "vodka"];
+  return spirits.find((spirit) => normalized.includes(spirit)) || "";
 }
 
 function renderCandidates(job) {
@@ -803,6 +1284,7 @@ async function approveCandidate(jobId, candidateId) {
     state.intakeJob = payload.job;
     renderCandidates(payload.job);
     setStatus(intakeStatus, "Approved " + payload.createdCount + " bottle" + (payload.createdCount === 1 ? "" : "s") + ".", "success");
+    loadPantry(true);
     if (state.inventoryItems.length > 0) {
       loadInventory();
     }
@@ -824,9 +1306,15 @@ function renderWineRecommendations(recommendations) {
     const card = document.createElement("article");
     card.className = "card";
     const reasons = (recommendation.reasons || []).map((reason) => "<li>" + escapeHtml(reason) + "</li>").join("");
+    const bottleVisualTarget = {
+      imageUrl: recommendation.imageUrl,
+      category: "wine",
+      label: recommendation.displayName,
+      displayName: recommendation.displayName
+    };
     card.innerHTML = \`
       <div class="card-header">
-        \${renderBottleVisual(recommendation)}
+        \${renderBottleVisual(bottleVisualTarget)}
         <div class="card-main">
           <h3>\${escapeHtml(recommendation.displayName)}</h3>
           <div class="meta">
@@ -943,6 +1431,144 @@ function renderInventory(items) {
     card.querySelector('[data-item-id]').addEventListener("click", () => openItemDetail(item.id));
     inventoryRoot.appendChild(card);
   });
+}
+
+function renderPantryPresets() {
+  const root = document.querySelector("#pantry-presets");
+  if (!root) {
+    return;
+  }
+
+  root.innerHTML = "";
+  pantryPresets.forEach((preset) => {
+    const tracked = state.pantryItems.some((item) =>
+      normalize(item.label) === normalize(preset.label) &&
+      normalize(item.producer) === normalize(preset.producer)
+    );
+
+    const card = document.createElement("div");
+    card.className = "pantry-preset-card";
+    card.innerHTML = \`
+      <div class="pantry-preset-icon">\${escapeHtml(getBottleIcon(preset.category, "", ""))}</div>
+      <div class="pantry-preset-copy">
+        <strong>\${escapeHtml(preset.label)}</strong>
+        <span>\${escapeHtml(titleCase(preset.category))} • \${escapeHtml(preset.location)}</span>
+      </div>
+      <button type="button" class="\${tracked ? "button-ghost" : "button-secondary"}" data-preset-id="\${escapeHtml(preset.id)}" \${tracked ? "disabled" : ""}>
+        \${tracked ? "Tracked" : "I have this"}
+      </button>
+    \`;
+
+    card.querySelector("[data-preset-id]")?.addEventListener("click", () => addPantryPreset(preset.id));
+    root.appendChild(card);
+  });
+}
+
+function renderPantryItems(items) {
+  pantryRoot.innerHTML = "";
+
+  if (!items.length) {
+    pantryRoot.innerHTML = '<div class="card"><p>No tracked syrups, mixers, or bitters yet. Use the quick-add cards above when you bring something fun home.</p></div>';
+    return;
+  }
+
+  items.forEach((item) => {
+    const card = document.createElement("article");
+    card.className = "card";
+    const name = [item.producer, item.label].filter(Boolean).join(" ");
+    card.innerHTML = \`
+      <div class="card-header">
+        \${renderBottleVisual(item)}
+        <div class="card-main">
+          <h3>\${escapeHtml(name)}</h3>
+          <div class="meta">
+            <span class="pill">\${escapeHtml(item.category)}</span>
+            <span class="pill">\${escapeHtml(item.status)}</span>
+            <span class="pill">\${escapeHtml(item.location)}</span>
+          </div>
+          \${item.notes ? '<p>' + escapeHtml(item.notes) + '</p>' : ""}
+        </div>
+      </div>
+      <div class="pantry-mini-actions">
+        <button type="button" class="button-ghost" data-open-pantry="\${escapeHtml(item.id)}">Open</button>
+        <button type="button" class="button-secondary" data-finish-pantry="\${escapeHtml(item.id)}">Finished</button>
+      </div>
+    \`;
+
+    card.querySelector("[data-open-pantry]")?.addEventListener("click", () => openItemDetail(item.id));
+    card.querySelector("[data-finish-pantry]")?.addEventListener("click", () => markPantryItemFinished(item.id));
+    pantryRoot.appendChild(card);
+  });
+}
+
+async function addPantryPreset(presetId) {
+  const preset = pantryPresets.find((entry) => entry.id === presetId);
+  if (!preset) {
+    return;
+  }
+
+  if (!state.token) {
+    setStatus(pantryStatus, "Add your BartenderGPT API token first.", "error");
+    return;
+  }
+
+  setStatus(pantryStatus, "Adding " + preset.label + "…");
+
+  try {
+    const response = await authedFetch("/api/v1/inventory/items", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        category: preset.category,
+        producer: preset.producer,
+        label: preset.label,
+        quantity: 1,
+        location: preset.location,
+        status: "sealed",
+        cocktailTags: preset.cocktailTags,
+        notes: "Tracked from the mobile pantry quick-add list."
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(await getErrorMessage(response));
+    }
+
+    await loadPantry(true);
+    if (state.inventoryItems.length > 0) {
+      await loadInventory();
+    }
+    setStatus(pantryStatus, preset.label + " added to your tracked pantry.", "success");
+  } catch (error) {
+    setStatus(pantryStatus, error.message || "Unable to add pantry item.", "error");
+  }
+}
+
+async function markPantryItemFinished(itemId) {
+  if (!state.token) {
+    setStatus(pantryStatus, "Add your BartenderGPT API token first.", "error");
+    return;
+  }
+
+  try {
+    const response = await authedFetch("/api/v1/inventory/items/" + encodeURIComponent(itemId) + "/consume", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notes: "Marked finished from pantry tracker." })
+    });
+
+    if (!response.ok) {
+      throw new Error(await getErrorMessage(response));
+    }
+
+    await loadPantry(true);
+    if (state.inventoryItems.length > 0) {
+      await loadInventory();
+    }
+    setStatus(pantryStatus, "Pantry item marked finished.", "success");
+  } catch (error) {
+    setStatus(pantryStatus, error.message || "Unable to update pantry item.", "error");
+  }
 }
 
 async function openItemDetail(itemId) {
@@ -1137,6 +1763,7 @@ async function saveSelectedItem(event) {
     await refreshSelectedItemEvents();
     renderItemDetail();
     await loadInventory();
+    await loadPantry(true);
     setStatus(document.querySelector("#detail-status-message"), "Saved.", "success");
   } catch (error) {
     setStatus(document.querySelector("#detail-status-message"), error.message || "Unable to save bottle.", "error");
@@ -1164,6 +1791,7 @@ async function consumeSelectedItem() {
     await refreshSelectedItemEvents();
     renderItemDetail();
     await loadInventory();
+    await loadPantry(true);
     setStatus(document.querySelector("#detail-status-message"), "Bottle marked consumed.", "success");
   } catch (error) {
     setStatus(document.querySelector("#detail-status-message"), error.message || "Unable to mark bottle consumed.", "error");
@@ -1215,6 +1843,7 @@ async function duplicateSelectedItem() {
     }
 
     await loadInventory();
+    await loadPantry(true);
     setStatus(document.querySelector("#detail-status-message"), "Added another bottle.", "success");
   } catch (error) {
     setStatus(document.querySelector("#detail-status-message"), error.message || "Unable to add another bottle.", "error");
@@ -1240,7 +1869,17 @@ function renderBottleVisual(item, large = false) {
   }
 
   const fallbackClass = large ? "fallback-thumbnail" : "fallback-thumbnail";
-  return '<div class="' + fallbackClass + '">' + escapeHtml(getInitials(item.displayName || item.name || [item.producer, item.label].filter(Boolean).join(" "))) + '</div>';
+  const displayName = item.label || item.displayName || item.name || [item.producer, item.label].filter(Boolean).join(" ") || "House bottle";
+  const category = titleCase(item.category || "bottle");
+  const vintage = item.vintage ? String(item.vintage) : "";
+  return '<div class="' + fallbackClass + '" aria-label="' + escapeAttribute(displayName) + '">' +
+    '<div class="fallback-icon" aria-hidden="true">' + escapeHtml(getBottleIcon(item.category, item.style, item.baseSpirit)) + "</div>" +
+    '<div class="fallback-label">' +
+      '<span class="fallback-category">' + escapeHtml(category) + "</span>" +
+      '<span class="fallback-name">' + escapeHtml(displayName) + "</span>" +
+      (vintage ? '<span class="fallback-vintage">' + escapeHtml(vintage) + "</span>" : "") +
+    "</div>" +
+  "</div>";
 }
 
 function getInitials(value) {
@@ -1249,6 +1888,55 @@ function getInitials(value) {
     .filter(Boolean)
     .slice(0, 2);
   return words.map((word) => word[0] || "").join("") || "BG";
+}
+
+function getBottleIcon(category, style, baseSpirit) {
+  const normalizedCategory = String(category || "").toLowerCase();
+  const normalizedStyle = String(style || "").toLowerCase();
+  const normalizedSpirit = String(baseSpirit || "").toLowerCase();
+
+  if (normalizedCategory === "wine") {
+    if (normalizedStyle.includes("sparkling") || normalizedStyle.includes("champagne")) {
+      return "🍾";
+    }
+    if (normalizedStyle.includes("rose")) {
+      return "🌷";
+    }
+    if (normalizedStyle.includes("white") || normalizedStyle.includes("chablis") || normalizedStyle.includes("riesling")) {
+      return "🥂";
+    }
+    return "🍷";
+  }
+
+  if (normalizedCategory === "liqueur" || normalizedCategory === "aperitif") {
+    return "🍸";
+  }
+
+  if (normalizedCategory === "bitters") {
+    return "💧";
+  }
+
+  if (normalizedCategory === "syrup" || normalizedCategory === "mixer") {
+    return "🧃";
+  }
+
+  if (normalizedSpirit.includes("rum")) {
+    return "🏝️";
+  }
+
+  if (normalizedSpirit.includes("tequila") || normalizedSpirit.includes("mezcal")) {
+    return "🌵";
+  }
+
+  if (normalizedSpirit.includes("gin")) {
+    return "🫒";
+  }
+
+  if (normalizedSpirit.includes("bourbon") || normalizedSpirit.includes("rye") || normalizedSpirit.includes("whiskey") || normalizedSpirit.includes("whisky")) {
+    return "🥃";
+  }
+
+  return "🍶";
 }
 
 function formatDate(value) {
@@ -1322,6 +2010,14 @@ function titleCase(value) {
     .join(" ");
 }
 
+function normalize(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function includesAny(haystack, needles) {
+  return needles.some((needle) => haystack.includes(needle));
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -1370,7 +2066,7 @@ export function renderMobileAppHtml() {
       <section class="hero">
         <div class="eyebrow">Pocket cellar and bar companion</div>
         <h1 class="title">BartenderGPT</h1>
-        <p class="subtitle">Upload new bottles from your phone, review what the model found, approve the keepers, and actually click into cocktails or bottles to see something useful.</p>
+        <p class="subtitle">Start with a feeling, a dinner plan, or a spirit craving. BartenderGPT will look through your bottles, pull in a little Chicago context, and point you toward something worth opening.</p>
       </section>
 
       <section class="token-card">
@@ -1387,6 +2083,28 @@ export function renderMobileAppHtml() {
       </section>
 
       <section class="section-grid">
+        <article class="panel panel-wide concierge-panel">
+          <h2>What are you feeling?</h2>
+          <p>Type the way you’d text a friend: dinner plan, vibe, weather, spirit craving, or “dealer’s choice.”</p>
+          <div class="context-strip">
+            <span id="ambient-context-chip" class="context-pill">Checking Chicago weather…</span>
+            <button id="refresh-ambient" class="button-ghost context-action" type="button">Refresh Chicago context</button>
+          </div>
+          <form id="concierge-form">
+            <div class="prompt-shell">
+              <textarea id="concierge-prompt" class="prompt-input" placeholder="We’re having roast chicken tonight and want an everyday white."></textarea>
+              <button class="button-primary prompt-submit" type="submit">Ask BartenderGPT</button>
+            </div>
+          </form>
+          <div class="prompt-templates">
+            <button type="button" class="prompt-chip" data-prompt-template="It's a warm June night in Chicago and I'm in a tiki mood. Dealer's choice.">Warm tiki night</button>
+            <button type="button" class="prompt-chip" data-prompt-template="It's Taco Tuesday and we want something bright and agave-driven.">Taco Tuesday agave</button>
+            <button type="button" class="prompt-chip" data-prompt-template="We're having roast chicken and want an everyday wine for a casual Tuesday.">Weeknight roast chicken wine</button>
+            <button type="button" class="prompt-chip" data-prompt-template="Give me a serious stirred cocktail for a quiet night in.">Quiet stirred classic</button>
+          </div>
+          <div id="concierge-status" class="status"></div>
+        </article>
+
         <article class="panel">
           <h2>Add bottles</h2>
           <p>Take a few Binny’s shelf photos, add a note if you want, and BartenderGPT will build a review queue.</p>
@@ -1467,10 +2185,23 @@ export function renderMobileAppHtml() {
 
       <section class="panel" style="margin-top: 16px;">
         <h2>Results</h2>
-        <p>Wine and cocktail suggestions will appear here.</p>
+        <p>Prompt-first wine and cocktail suggestions will appear here, with the detailed structured forms still available above if you want to steer more directly.</p>
         <div id="recommendations-status" class="status"></div>
         <div id="recommendations" class="recommendation-list">
           <div class="card"><p>Ask for a pairing or cocktail, and I’ll fill this section in.</p></div>
+        </div>
+      </section>
+
+      <section class="panel" style="margin-top: 16px;">
+        <h2>Tracked pantry</h2>
+        <p>Keep an eye on the non-staples that actually change what cocktails are on the table: syrups, bitters, cherries, pineapple juice, and the fun supporting players.</p>
+        <div id="pantry-presets" class="pantry-preset-grid"></div>
+        <div class="button-row" style="margin-bottom: 14px;">
+          <button id="load-pantry" class="button-ghost" type="button">Load pantry</button>
+        </div>
+        <div id="pantry-status" class="status"></div>
+        <div id="pantry-results" class="inventory-list">
+          <div class="card"><p>Tracked pantry items will show up here once loaded.</p></div>
         </div>
       </section>
 

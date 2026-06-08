@@ -356,6 +356,258 @@ export function buildChatGptActionOpenApiSpec(serverUrl: string) {
           }
         }
       },
+      "/api/v1/chatgpt/workouts": {
+        post: {
+          operationId: "logWorkout",
+          summary: "Save a completed workout.",
+          description:
+            "Create a structured workout log from the user's conversation or uploaded workout image. Include movements, scheme, score, duration, and source files when available.",
+          "x-openai-isConsequential": true,
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: {
+                    performedAt: {
+                      type: "string",
+                      format: "date-time"
+                    },
+                    title: {
+                      type: "string"
+                    },
+                    workoutType: {
+                      type: "string",
+                      enum: [
+                        "emom",
+                        "amrap",
+                        "for_time",
+                        "strength",
+                        "interval",
+                        "chipper",
+                        "accessory",
+                        "other"
+                      ]
+                    },
+                    summary: {
+                      type: "string"
+                    },
+                    rawText: {
+                      type: "string"
+                    },
+                    durationSeconds: {
+                      type: "integer"
+                    },
+                    scoreType: {
+                      type: "string",
+                      enum: [
+                        "time",
+                        "reps",
+                        "rounds",
+                        "load",
+                        "distance",
+                        "calories",
+                        "notes",
+                        "none"
+                      ]
+                    },
+                    scoreValue: {
+                      type: "number"
+                    },
+                    scoreUnit: {
+                      type: "string"
+                    },
+                    notes: {
+                      type: "string"
+                    },
+                    movements: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        additionalProperties: false,
+                        properties: {
+                          name: {
+                            type: "string"
+                          },
+                          category: {
+                            type: "string"
+                          },
+                          equipment: {
+                            type: "string"
+                          },
+                          bodyRegions: {
+                            type: "array",
+                            items: {
+                              type: "string"
+                            }
+                          },
+                          loadValue: {
+                            type: "number"
+                          },
+                          loadUnit: {
+                            type: "string"
+                          },
+                          reps: {
+                            type: "integer"
+                          },
+                          distanceValue: {
+                            type: "number"
+                          },
+                          distanceUnit: {
+                            type: "string"
+                          },
+                          calories: {
+                            type: "number"
+                          },
+                          durationSeconds: {
+                            type: "integer"
+                          },
+                          orderIndex: {
+                            type: "integer"
+                          }
+                        },
+                        required: ["name"]
+                      }
+                    },
+                    openaiFileIdRefs: {
+                      type: "array",
+                      items: {
+                        type: "string"
+                      }
+                    }
+                  },
+                  required: ["summary"]
+                }
+              }
+            }
+          },
+          responses: {
+            "201": {
+              description: "Workout saved."
+            }
+          }
+        }
+      },
+      "/api/v1/chatgpt/workouts/search": {
+        get: {
+          operationId: "searchWorkouts",
+          summary: "Search workout history.",
+          description:
+            "Search Andrew's stored workouts by movement, workout type, date range, or text.",
+          "x-openai-isConsequential": false,
+          security: [],
+          parameters: [
+            {
+              name: "movement",
+              in: "query",
+              schema: {
+                type: "string"
+              }
+            },
+            {
+              name: "workoutType",
+              in: "query",
+              schema: {
+                type: "string",
+                enum: [
+                  "emom",
+                  "amrap",
+                  "for_time",
+                  "strength",
+                  "interval",
+                  "chipper",
+                  "accessory",
+                  "other"
+                ]
+              }
+            },
+            {
+              name: "text",
+              in: "query",
+              schema: {
+                type: "string"
+              }
+            },
+            {
+              name: "from",
+              in: "query",
+              schema: {
+                type: "string",
+                format: "date-time"
+              }
+            },
+            {
+              name: "to",
+              in: "query",
+              schema: {
+                type: "string",
+                format: "date-time"
+              }
+            },
+            {
+              name: "limit",
+              in: "query",
+              schema: {
+                type: "integer",
+                default: 25
+              }
+            }
+          ],
+          responses: {
+            "200": {
+              description: "Workout search results."
+            }
+          }
+        }
+      },
+      "/api/v1/chatgpt/workouts/similar": {
+        get: {
+          operationId: "findSimilarWorkouts",
+          summary: "Find similar workouts.",
+          description:
+            "Find workouts similar to a workout ID or query text. This currently uses structured and lexical similarity with an embeddings table reserved for vector search.",
+          "x-openai-isConsequential": false,
+          security: [],
+          parameters: [
+            {
+              name: "workoutId",
+              in: "query",
+              schema: {
+                type: "string"
+              }
+            },
+            {
+              name: "query",
+              in: "query",
+              schema: {
+                type: "string"
+              }
+            },
+            {
+              name: "movement",
+              in: "query",
+              schema: {
+                type: "string"
+              }
+            },
+            {
+              name: "limit",
+              in: "query",
+              schema: {
+                type: "integer",
+                default: 5
+              }
+            }
+          ],
+          responses: {
+            "200": {
+              description: "Similar workout results."
+            }
+          }
+        }
+      },
       "/api/v1/recommendations/wine": {
         post: {
           operationId: "suggestWinesForMeal",

@@ -24,6 +24,10 @@ import { createInventoryItemRequestSchema } from "@bartendergpt/domain";
 import { demoInventory } from "../data/demoInventory.js";
 import type { BartenderGptAppContext } from "./appContext.js";
 import { extractIntakeCandidates } from "./intakeExtraction.js";
+import {
+  InMemoryWorkoutStore,
+  SqliteWorkoutStore
+} from "./workoutStore.js";
 
 export type StoreMode = "memory" | "sqlite";
 export type InventorySourceSystem =
@@ -1515,6 +1519,7 @@ export async function createAppContext(): Promise<BartenderGptAppContext> {
 
     return {
       inventoryStore,
+      workoutStore: new SqliteWorkoutStore(database),
       storeMode: "sqlite"
     };
   } catch (error) {
@@ -1525,6 +1530,7 @@ export async function createAppContext(): Promise<BartenderGptAppContext> {
 
     return {
       inventoryStore: new InMemoryInventoryStore(demoInventory),
+      workoutStore: new InMemoryWorkoutStore(),
       storeMode: "memory"
     };
   }

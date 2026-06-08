@@ -10,6 +10,7 @@ import { intakeRoutes } from "./routes/intake.js";
 import { mobileRoutes } from "./routes/mobile.js";
 import { inventoryRoutes } from "./routes/inventory.js";
 import { recommendationRoutes } from "./routes/recommendations.js";
+import { workoutRoutes } from "./routes/workouts.js";
 
 export function buildApp(context: BartenderGptAppContext) {
   const app = Fastify({
@@ -49,6 +50,7 @@ export function buildApp(context: BartenderGptAppContext) {
   app.register(recommendationRoutes(context), {
     prefix: "/api/v1/recommendations"
   });
+  app.register(workoutRoutes(context), { prefix: "/api/v1/workouts" });
 
   return app;
 }
