@@ -182,11 +182,24 @@ function matchesWorkoutQuery(workout: WorkoutRecord, query?: WorkoutQuery) {
 }
 
 function tokenize(value: string): Set<string> {
+  const stopWords = new Set([
+    "and",
+    "the",
+    "for",
+    "with",
+    "from",
+    "then",
+    "every",
+    "minute"
+  ]);
   return new Set(
     value
       .toLowerCase()
       .split(/[^a-z0-9]+/)
-      .filter((term) => term.length >= 3)
+      .map((term) =>
+        term.length > 4 && term.endsWith("s") ? term.slice(0, -1) : term
+      )
+      .filter((term) => term.length >= 3 && !stopWords.has(term))
   );
 }
 
